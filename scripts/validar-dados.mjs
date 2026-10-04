@@ -185,9 +185,9 @@ function checkConfig(rootDir, addError, addWarning) {
       parsed = null;
     }
     if (!parsed || parsed.protocol !== "https:") {
-      error("siteUrl", show(config.siteUrl) + " precisa começar com https:// (ex.: \"https://arthurkretzer.github.io/presentes-casamento/\").");
+      error("siteUrl", show(config.siteUrl) + " precisa começar com https:// (ex.: \"https://arthurkretzer.github.io/aem-casamento-civil/\").");
     } else if (!config.siteUrl.endsWith("/")) {
-      error("siteUrl", show(config.siteUrl) + " precisa terminar com \"/\" (ex.: \"https://arthurkretzer.github.io/presentes-casamento/\").");
+      error("siteUrl", show(config.siteUrl) + " precisa terminar com \"/\" (ex.: \"https://arthurkretzer.github.io/aem-casamento-civil/\").");
     }
   }
 
@@ -435,7 +435,7 @@ function checkIndexHtml(rootDir, addError) {
     addError(
       INDEX_FILE,
       "linha " + lineOf(html, match.index),
-      attribute + "=\"/" + match[2] + "\" começa com \"/\". O site é publicado em um subcaminho (…/presentes-casamento/), então use caminho relativo: " +
+      attribute + "=\"/" + match[2] + "\" começa com \"/\". O site é publicado em um subcaminho (…/aem-casamento-civil/), então use caminho relativo: " +
         attribute + "=\"" + (match[2] || "./") + "\"."
     );
   }

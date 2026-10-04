@@ -2,7 +2,7 @@
 
 Site do casamento civil de Arthur & Marina: **segunda-feira, 16 de novembro de 2026, às 19h**, no Edifício Vila Salomy (Estreito, Florianópolis).
 
-**No ar em: <https://arthurkretzer.github.io/presentes-casamento/>**
+**No ar em: <https://arthurkretzer.github.io/aem-casamento-civil/>**
 
 O que tem nele: a data e o local (com links para Google Maps, Waze e agenda), a lista de presentes com **Pix direto para vocês** (QR Code e Pix Copia e Cola já com o valor preenchido, sem plataforma no meio), um campo de valor livre, o traje e um pedido para confirmarem a presença direto com vocês. Um menu fixo no topo leva a cada seção.
 
@@ -122,7 +122,7 @@ Aba **Actions** do repositório, fluxo **Site**, execução mais recente:
 - ícone verde: testado e publicado (leva 1 a 2 minutos para aparecer no site);
 - ícone vermelho: nada novo foi ao ar; o site continua como estava. Abra o job que falhou, leia a mensagem, corrija e faça outro commit.
 
-Para conferir qual versão está no ar, abra `https://arthurkretzer.github.io/presentes-casamento/version.txt`: ele mostra o código do último commit publicado.
+Para conferir qual versão está no ar, abra `https://arthurkretzer.github.io/aem-casamento-civil/version.txt`: ele mostra o código do último commit publicado.
 
 O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma alteração que já foi ao ar: abra o arquivo no GitHub, clique em **History**, abra a versão anterior (botão **View file** / `<>`), copie o conteúdo, cole no arquivo atual (lápis **Edit this file**) e faça o commit. Isso publica de novo a versão antiga.
 
@@ -145,12 +145,12 @@ Precisa do [Node.js](https://nodejs.org) 22 ou mais novo.
 npm install                       # instala as dependências (uma vez)
 npx playwright install chromium   # baixa o navegador dos testes (uma vez)
 
-npm run servir                    # site em http://127.0.0.1:4173/presentes-casamento/
+npm run servir                    # site em http://127.0.0.1:4173/aem-casamento-civil/
 npm test                          # valida config/presentes + testes unitários
 npx playwright test               # testes no navegador (sobe o servidor sozinho)
 ```
 
-O servidor local serve a pasta `site/` sob `/presentes-casamento/`, igual ao GitHub Pages, por isso **todos os caminhos do site são relativos** (sem `/` no começo). Para usar outra porta: `npm run servir -- --port 4180`.
+O servidor local serve a pasta `site/` sob `/aem-casamento-civil/`, igual ao GitHub Pages, por isso **todos os caminhos do site são relativos** (sem `/` no começo). Para usar outra porta: `npm run servir -- --port 4180`.
 
 Outras formas de rodar os testes no navegador:
 
@@ -160,7 +160,7 @@ npx playwright test -g "valor livre"          # só testes com esse nome
 npx playwright test --ui                      # modo visual, bom para depurar
 
 # testar o site já publicado (em vez do servidor local)
-BASE_URL=https://arthurkretzer.github.io/presentes-casamento/ npx playwright test
+BASE_URL=https://arthurkretzer.github.io/aem-casamento-civil/ npx playwright test
 ```
 
 No Windows (PowerShell), defina a variável antes: `$env:BASE_URL="https://..."; npx playwright test`.

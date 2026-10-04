@@ -252,7 +252,7 @@ describe("repositório atual", () => {
 const BASE_CONFIG = Object.freeze({
   pix: Object.freeze({ chave: "", recebedor: "", nomeQr: "ARTHUR E MARINA", cidadeQr: "SAO JOSE" }),
   whatsapp: "",
-  siteUrl: "https://arthurkretzer.github.io/presentes-casamento/",
+  siteUrl: "https://arthurkretzer.github.io/aem-casamento-civil/",
 });
 
 const BASE_GIFTS = Object.freeze([
@@ -407,12 +407,12 @@ describe("validar-dados: ERROS em config.js", () => {
       options: { config: { whatsapp } },
       expect: { file: CONFIG_FILE, where: "whatsapp", pattern: /não é válido.*55.*5548999998888/ },
     })),
-    ...["http://arthurkretzer.github.io/presentes-casamento/", "arthurkretzer.github.io/presentes-casamento/", "//arthurkretzer.github.io/", "", "ftp://x.y/"].map((siteUrl) => ({
+    ...["http://arthurkretzer.github.io/aem-casamento-civil/", "arthurkretzer.github.io/aem-casamento-civil/", "//arthurkretzer.github.io/", "", "ftp://x.y/"].map((siteUrl) => ({
       name: `siteUrl ${JSON.stringify(siteUrl)} (não é https)`,
       options: { config: { siteUrl } },
       expect: { file: CONFIG_FILE, where: "siteUrl", pattern: /https:\/\// },
     })),
-    ...["https://arthurkretzer.github.io/presentes-casamento", "https://arthurkretzer.github.io"].map((siteUrl) => ({
+    ...["https://arthurkretzer.github.io/aem-casamento-civil", "https://arthurkretzer.github.io"].map((siteUrl) => ({
       name: `siteUrl ${JSON.stringify(siteUrl)} (sem "/" no fim)`,
       options: { config: { siteUrl } },
       expect: { file: CONFIG_FILE, where: "siteUrl", pattern: /terminar com "\/"/ },

@@ -1,7 +1,7 @@
 # Site do casamento Arthur & Marina
 
 Site estático (HTML/CSS/JS puro, sem build) no GitHub Pages, em SUBCAMINHO:
-https://arthurkretzer.github.io/presentes-casamento/. Textos, README e comentários em pt-BR;
+https://arthurkretzer.github.io/aem-casamento-civil/. Textos, README e comentários em pt-BR;
 nomes de funções e variáveis em inglês.
 
 ## Estrutura
@@ -13,13 +13,13 @@ nomes de funções e variáveis em inglês.
 - `.github/workflows/pages.yml`: testes em toda branch; só a `main` publica (sem job de verificação pós-deploy).
 
 ## Comandos
-- `npm run servir` abre http://127.0.0.1:4173/presentes-casamento/
+- `npm run servir` abre http://127.0.0.1:4173/aem-casamento-civil/
 - `npm test` (valida dados + unitários) e `npx playwright test` (desktop e mobile; sobe o servidor sozinho)
 - `BASE_URL=<url> npx playwright test` testa a produção (`tests/e2e/site.spec.mjs`, testes de fumaça)
 - Atrás de proxy TLS, passe argumentos ao Chromium com `PW_CHROMIUM_ARGS`; nunca use `ignoreHTTPSErrors`.
 
 ## Regras
-- URLs sempre relativas (`assets/js/app.js`, nunca `/assets/...`): o site vive em `/presentes-casamento/`.
+- URLs sempre relativas (`assets/js/app.js`, nunca `/assets/...`): o site vive em `/aem-casamento-civil/`.
 - CSP `default-src 'self'`: nada inline (script, style, onclick). Fontes e libs locais, sem CDN.
 - A chave Pix vem SÓ de `site/config.js`, nunca de URL, query string ou campo da página.
   Chave vazia ou inválida mantém `html[data-pix="em-breve"]`.

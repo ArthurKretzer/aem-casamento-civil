@@ -4,7 +4,7 @@
 //   BASE_URL=https://... npx playwright test   testa o site já publicado
 //
 // Nos testes, use sempre page.goto("./"): o caminho relativo preserva o
-// subcaminho /presentes-casamento/ do GitHub Pages.
+// subcaminho /aem-casamento-civil/ do GitHub Pages.
 
 import { defineConfig, devices } from "@playwright/test";
 
@@ -16,7 +16,7 @@ const isCI = Boolean(process.env.CI);
 const remoteUrl = (process.env.BASE_URL || "").trim();
 const baseURL = remoteUrl
   ? remoteUrl.replace(/\/*$/, "/")
-  : "http://127.0.0.1:4173/presentes-casamento/";
+  : "http://127.0.0.1:4173/aem-casamento-civil/";
 
 // Argumentos extras do Chromium, separados por espaço. Vazio no GitHub
 // Actions; só é usado em ambientes com proxy HTTPS próprio.

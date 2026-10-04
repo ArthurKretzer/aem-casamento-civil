@@ -27,5 +27,5 @@ window.SITE_CONFIG = {
   whatsapp: "5548999263500",
 
   // Endereço público do site, terminando em "/".
-  siteUrl: "https://arthurkretzer.github.io/presentes-casamento/",
+  siteUrl: "https://arthurkretzer.github.io/aem-casamento-civil/",
 };

@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Servidor estático mínimo, sem dependências, para ver e testar o site na
 // sua máquina. Imita o GitHub Pages: o conteúdo de site/ fica sob o
-// subcaminho /presentes-casamento/ (igual à produção), então URLs absolutas
+// subcaminho /aem-casamento-civil/ (igual à produção), então URLs absolutas
 // quebradas aparecem aqui e não só depois de publicar.
 //
 //   node scripts/servir.mjs [--port 4173]      (ou PORT=4173)
 //
-// Abra: http://127.0.0.1:4173/presentes-casamento/
+// Abra: http://127.0.0.1:4173/aem-casamento-civil/
 
 import { createServer } from "node:http";
 import { createReadStream } from "node:fs";
@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 
 const HOST = "127.0.0.1";
 const DEFAULT_PORT = 4173;
-const PREFIX = "/presentes-casamento/";
+const PREFIX = "/aem-casamento-civil/";
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "site");
 
 const MIME_TYPES = {
