@@ -666,22 +666,18 @@ footer small {
 /* ---------- Ramos decorativos ---------- */
 .botanical {
   position: absolute;
-  width: 420px;
-  height: 520px;
-  opacity: .56;
+  width: clamp(190px, 29vw, 390px);
+  aspect-ratio: 440 / 500;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 12%, transparent 0 20%, var(--gold-light) 21% 22%, transparent 23%),
-    radial-gradient(ellipse at 25% 30%, transparent 0 19%, var(--gold-light) 20% 21%, transparent 22%),
-    radial-gradient(ellipse at 66% 47%, transparent 0 18%, var(--gold-light) 19% 20%, transparent 21%),
-    linear-gradient(120deg, transparent 0 47%, rgba(185,138,77,.32) 48% 48.5%, transparent 49%);
-  filter: saturate(.7);
+  background: no-repeat center / contain;
 }
 
-.botanical--tl { left: -210px; top: -180px; transform: rotate(-18deg); }
-.botanical--tr { right: -220px; top: -190px; transform: rotate(28deg); }
-.botanical--bl { left: -250px; bottom: -250px; transform: rotate(40deg); }
-.botanical--br { right: -240px; bottom: -250px; transform: rotate(-35deg); }
+/* Folhas do convite (desenho em traço dourado): canto A e canto B,
+   espelhados para os cantos de baixo. */
+.botanical--tl { left: 0; top: 0; background-image: url("../img/hero/folhas-canto-a.svg"); background-position: left top; }
+.botanical--tr { right: 0; top: 0; background-image: url("../img/hero/folhas-canto-b.svg"); background-position: right top; }
+.botanical--bl { left: 0; bottom: 0; background-image: url("../img/hero/folhas-canto-b.svg"); background-position: right top; transform: rotate(180deg); }
+.botanical--br { right: 0; bottom: 0; background-image: url("../img/hero/folhas-canto-a.svg"); background-position: left top; transform: rotate(180deg); }
 
 /* ---------- Modal Pix ---------- */
 .pix-dialog {
@@ -976,7 +972,8 @@ footer small {
   .detail + .detail { border-left: 0; border-top: 1px solid var(--line); }
   .custom-gift { display: block; padding: 24px 20px; }
   .custom-gift__form { margin-top: 18px; }
-  .botanical { opacity: .38; transform: scale(.7); }
+  .botanical { opacity: .75; }
+  .botanical--bl, .botanical--br { width: 150px; }
   .dialog-inner { padding: 44px 20px 24px; }
   .dialog-head h2 { font-size: 36px; }
 }
