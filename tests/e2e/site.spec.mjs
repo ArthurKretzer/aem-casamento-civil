@@ -181,6 +181,23 @@ test("presente em cotas: o convidado escolhe quantas cotas e o Pix acompanha", a
   await expect(page.getByTestId("pix-valor")).toHaveText(PixBR.formatBRL(100000));
 });
 
+test("menu leva às seções; traje casual e presença sem WhatsApp nem prazo", async ({ page }) => {
+  await openSite(page, TEST);
+  const menu = page.getByTestId("menu");
+  await expect(menu.getByRole("link", { name: "Celebração" })).toBeVisible();
+  await expect(menu.getByRole("link", { name: "Presença" })).toBeVisible();
+  await menu.getByRole("link", { name: "Presentes" }).click();
+  const heading = page.locator("#presentes h2");
+  await expect(heading).toBeInViewport();
+  await expect.poll(async () => (await heading.boundingBox()).y).toBeGreaterThanOrEqual((await menu.boundingBox()).height);
+
+  await expect(page.getByTestId("traje")).toContainText(/casual/i);
+  const rsvp = page.getByTestId("rsvp");
+  await expect(rsvp).toContainText(/confirme sua presença/i);
+  await expect(rsvp.locator('a[href*="wa.me"]')).toHaveCount(0);
+  await expect(rsvp).not.toContainText(/\d{1,2} de \w+|até/);
+});
+
 test("no celular (360px) não há rolagem horizontal", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await openSite(page, TEST);

@@ -441,33 +441,26 @@
     });
   }
 
-  // ---------- Confirmação de presença ----------
-  function formatDeadline(isoDate) {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(isoDate || ""));
-    if (!match) return "";
-    const date = new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])));
-    return new Intl.DateTimeFormat("pt-BR", { day: "numeric", month: "long", timeZone: "UTC" }).format(date);
-  }
-
-  function setupRsvp() {
-    const deadline = formatDeadline(CONFIG.rsvpPrazo);
-    if (deadline) byTestId("rsvp-prazo").textContent = `até ${deadline}`;
-
-    const rsvpButton = byTestId("rsvp-botao");
-    const rsvpAlt = byTestId("rsvp-sem-whatsapp");
-    if (hasWhatsapp) {
-      rsvpButton.href = whatsappLink("Olá, Arthur e Marina! Quero confirmar minha presença no jantar do casamento, dia 16/11. Nome(s): ");
-      rsvpButton.hidden = false;
-      rsvpAlt.hidden = true;
-    } else {
-      rsvpButton.hidden = true;
-      rsvpAlt.hidden = false;
-    }
+  // ---------- Menu: destaca a seção visível ----------
+  function setupNav() {
+    const links = [...document.querySelectorAll(".site-nav__links a")];
+    const sections = links.map((link) => document.querySelector(link.getAttribute("href"))).filter(Boolean);
+    if (!("IntersectionObserver" in window) || !sections.length) return;
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        for (const link of links) {
+          if (link.getAttribute("href") === `#${entry.target.id}`) link.setAttribute("aria-current", "true");
+          else link.removeAttribute("aria-current");
+        }
+      }
+    }, { rootMargin: "-45% 0px -50% 0px" });
+    sections.forEach((section) => observer.observe(section));
   }
 
   renderGifts();
   setupCustomGift();
   setupReceiver();
   setupDialog();
-  setupRsvp();
+  setupNav();
 })();

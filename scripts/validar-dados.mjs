@@ -34,7 +34,7 @@ const GIFT_ID_RE = /^[a-z0-9-]+$/;
 const MIN_VALUE_REAIS = 1;
 const MAX_VALUE_REAIS = 100000;
 
-const CONFIG_KEYS = ["pix", "whatsapp", "rsvpPrazo", "siteUrl"];
+const CONFIG_KEYS = ["pix", "whatsapp", "siteUrl"];
 const PIX_KEYS = ["chave", "recebedor", "nomeQr", "cidadeQr"];
 // Chave do exemplo oficial do Banco Central: aparece no README e nos testes, nunca no site.
 const EXAMPLE_KEY = "123e4567-e12b-12d1-a456-426655440000";
@@ -104,13 +104,6 @@ function blankHtmlComments(html) {
   return html.replace(/<!--[\s\S]*?-->/g, (comment) => comment.replace(/[^\n]/g, " "));
 }
 
-function isRealIsoDate(text) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
-  const date = new Date(text + "T00:00:00Z");
-  // "2026-02-30" vira 2 de março (ou data inválida): só vale se der a mesma data de volta.
-  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
-}
-
 // ---------------------------------------------------------------------
 // Validação
 // ---------------------------------------------------------------------
@@ -148,7 +141,7 @@ function checkConfig(rootDir, addError, addWarning) {
   const warning = (where, message) => addWarning(CONFIG_FILE, where, message);
 
   if (!isPlainObject(config)) {
-    error("", "window.SITE_CONFIG precisa ser um bloco { pix: {...}, whatsapp: \"...\", rsvpPrazo: \"...\", siteUrl: \"...\" }.");
+    error("", "window.SITE_CONFIG precisa ser um bloco { pix: {...}, whatsapp: \"...\", siteUrl: \"...\" }.");
     return state;
   }
 
@@ -170,7 +163,6 @@ function checkConfig(rootDir, addError, addWarning) {
     error("pix", "precisa ser um bloco { chave, recebedor, nomeQr, cidadeQr }; veio " + show(pix) + ".");
   }
   const whatsappOk = needText(config.whatsapp, "whatsapp");
-  const rsvpOk = needText(config.rsvpPrazo, "rsvpPrazo");
   const siteUrlOk = needText(config.siteUrl, "siteUrl");
   Object.keys(config)
     .filter((key) => !CONFIG_KEYS.includes(key))
@@ -182,11 +174,6 @@ function checkConfig(rootDir, addError, addWarning) {
       "whatsapp",
       show(config.whatsapp) + " não é válido. Use só números, com o código do país (55) e o DDD, sem espaços, +, parênteses ou traços (12 ou 13 dígitos). Exemplo: \"5548999998888\". Para esconder os botões, deixe \"\"."
     );
-  }
-
-  // --- Prazo da confirmação de presença ------------------------------
-  if (rsvpOk && !isRealIsoDate(config.rsvpPrazo)) {
-    error("rsvpPrazo", show(config.rsvpPrazo) + " não é uma data válida. Use o formato AAAA-MM-DD, por exemplo \"2026-10-15\".");
   }
 
   // --- Endereço do site ----------------------------------------------

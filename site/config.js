@@ -22,12 +22,9 @@ window.SITE_CONFIG = {
     cidadeQr: "SAO JOSE",
   },
 
-  // WhatsApp para confirmação de presença e recados: DDI + DDD + número,
-  // só dígitos. Exemplo: "5548999998888". Vazio = botões ocultos.
+  // WhatsApp para o botão "avisar os noivos" depois do Pix: DDI + DDD +
+  // número, só dígitos. Exemplo: "5548999998888". Vazio = botão oculto.
   whatsapp: "5548999263500",
-
-  // Data limite para confirmar presença (AAAA-MM-DD).
-  rsvpPrazo: "2026-10-15",
 
   // Endereço público do site, terminando em "/".
   siteUrl: "https://arthurkretzer.github.io/presentes-casamento/",

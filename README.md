@@ -4,7 +4,7 @@ Site do casamento civil de Arthur & Marina: **segunda-feira, 16 de novembro de 2
 
 **No ar em: <https://arthurkretzer.github.io/presentes-casamento/>**
 
-O que tem nele: a data e o local (com links para Google Maps, Waze e agenda), a lista de presentes com **Pix direto para vocês** (QR Code e Pix Copia e Cola já com o valor preenchido, sem plataforma no meio), um campo de valor livre e a confirmação de presença pelo WhatsApp.
+O que tem nele: a data e o local (com links para Google Maps, Waze e agenda), a lista de presentes com **Pix direto para vocês** (QR Code e Pix Copia e Cola já com o valor preenchido, sem plataforma no meio), um campo de valor livre, o traje e um pedido para confirmarem a presença direto com vocês. Um menu fixo no topo leva a cada seção.
 
 O site é estático (só HTML, CSS e JavaScript), não usa banco de dados nem serviços externos e **não aparece no Google** (`noindex`): só chega nele quem recebe o link.
 
@@ -14,7 +14,7 @@ O site é estático (só HTML, CSS e JavaScript), não usa banco de dados nem se
 
 Quase tudo o que muda fica em dois arquivos dentro da pasta `site/`:
 
-- `site/config.js`: Pix, WhatsApp e prazo de confirmação;
+- `site/config.js`: Pix e WhatsApp;
 - `site/presentes.js`: a lista de presentes.
 
 Os textos fixos (data, local, frases) ficam em `site/index.html` e o visual em `site/assets/css/styles.css`.
@@ -37,8 +37,7 @@ Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida,
 | `pix.recebedor` | O nome do titular **exatamente como o app do banco mostra** na hora de pagar. Os convidados conferem esse nome antes de confirmar. |
 | `pix.nomeQr` | Nome gravado dentro do QR Code: sem acentos, até 25 letras (ex.: `"ARTHUR E MARINA"`). |
 | `pix.cidadeQr` | Cidade gravada no QR Code: sem acentos, até 15 letras (ex.: `"SAO JOSE"`). |
-| `whatsapp` | DDI + DDD + número, só dígitos (ex.: `"5548999998888"`). **Vazio = os botões de WhatsApp somem** e aparece um texto pedindo para confirmar direto com vocês. |
-| `rsvpPrazo` | Data limite para confirmar presença, no formato `AAAA-MM-DD` (ex.: `"2026-10-15"`). O site mostra "até 15 de outubro". |
+| `whatsapp` | DDI + DDD + número, só dígitos (ex.: `"5548999998888"`). Usado só no botão **avisar os noivos**, depois do Pix. **Vazio = o botão some.** |
 | `siteUrl` | Endereço público do site, terminando em `/`. |
 
 ### O modo "Pix em breve"
@@ -97,8 +96,7 @@ O dinheiro dos presentes cai direto na conta de vocês, então vale cuidar bem d
 - [ ] Os dois testes (QR Code e Copia e Cola) em **2 bancos diferentes**, por exemplo um banco tradicional e uma conta digital.
 - [ ] Em cada teste: o nome do recebedor na tela do banco é o esperado, o valor é o certo e o dinheiro apareceu no extrato.
 - [ ] Ao abrir um presente, o recebedor mostrado no modal ("O recebedor deve aparecer como...") é o de vocês.
-- [ ] `whatsapp` preenchido no `config.js` e o botão **confirmar presença** abre a conversa certa (lembrem que o número fica público no site e no repositório).
-- [ ] `rsvpPrazo` com a data certa (hoje: 15 de outubro). Depois do prazo o site continua mostrando a data; se quiserem, esvaziem `whatsapp` para esconder o botão.
+- [ ] `whatsapp` preenchido no `config.js` e o botão **avisar os noivos** abre a conversa certa (lembrem que o número fica público no site e no repositório).
 
 ### Depois do casamento
 
@@ -174,7 +172,7 @@ Os testes de navegador (`tests/e2e/site.spec.mjs`) são poucos e rápidos, de pr
 ```text
 site/                        tudo o que vai ao ar (só esta pasta é publicada)
   index.html                 a página
-  config.js                  dados dos noivos: Pix, WhatsApp, prazo     <- vocês editam
+  config.js                  dados dos noivos: Pix e WhatsApp          <- vocês editam
   presentes.js               lista de presentes                         <- vocês editam
   casamento.ics              evento para agenda (Apple, Outlook)
   assets/

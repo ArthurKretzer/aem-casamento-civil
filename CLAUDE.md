@@ -5,7 +5,7 @@ https://arthurkretzer.github.io/presentes-casamento/. Textos, README e comentár
 nomes de funções e variáveis em inglês.
 
 ## Estrutura
-- `site/` é a única pasta publicada. Os noivos editam só `site/config.js` (Pix, WhatsApp, prazo)
+- `site/` é a única pasta publicada. Os noivos editam só `site/config.js` (Pix e WhatsApp do "avisar os noivos")
   e `site/presentes.js` (lista de presentes).
 - `site/assets/js/pix.js` (UMD: `PixBR` no navegador, `module.exports` no Node) e `app.js` (página e modal).
   Os `data-testid` do HTML são o contrato com os testes.
@@ -32,5 +32,6 @@ nomes de funções e variáveis em inglês.
   (o CI testa e publica). `site/version.txt` é gerado pelo CI: não commitar.
 - O site é simples: mantenha os testes enxutos (fumaça + Pix). Mudança pequena não precisa de
   QA extenso, novos specs nem novos jobs de CI; rode `npm test` e `npx playwright test` e publique.
+- A confirmação de presença não tem prazo nem botão de WhatsApp (de propósito): só pede para falar com os noivos.
 - A seção "Sem intermediários" foi removida de propósito: a experiência é de lista de presentes;
   o Pix é só o meio de pagamento dentro do modal.

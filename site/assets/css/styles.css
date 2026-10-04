@@ -114,9 +114,61 @@ main { overflow: hidden; }
 
 html:has(.pix-dialog[open]) { overflow: hidden; }
 
+/* ---------- Menu ---------- */
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 clamp(16px, 4vw, 40px);
+  background: rgba(251, 250, 247, .92);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+
+.site-nav__brand {
+  font-family: var(--script);
+  font-size: 30px;
+  line-height: 56px;
+  color: var(--gold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.site-nav__links {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  gap: clamp(4px, 2.5vw, 28px);
+}
+
+.site-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--gold-text);
+  border-bottom: 1px solid transparent;
+}
+
+.site-nav__links a:hover,
+.site-nav__links a[aria-current] { color: var(--ink); border-bottom-color: var(--gold); }
+
+section[id] { scroll-margin-top: 57px; }
+
 /* ---------- Abertura ---------- */
 .hero {
-  min-height: 100svh;
+  min-height: calc(100svh - 57px);
   position: relative;
   display: grid;
   place-items: center;
@@ -257,7 +309,7 @@ html:has(.pix-dialog[open]) { overflow: hidden; }
   width: min(900px, 100%);
   margin: 70px auto 0;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -529,7 +581,7 @@ html:has(.pix-dialog[open]) { overflow: hidden; }
   color: #9a3d26;
 }
 
-.custom-gift button, .btn--primary, .rsvp-button {
+.custom-gift button, .btn--primary {
   border: 0;
   background: var(--gold-deep);
   color: white;
@@ -544,7 +596,7 @@ html:has(.pix-dialog[open]) { overflow: hidden; }
   transition: background-color .2s ease;
 }
 
-.custom-gift button:hover, .btn--primary:hover, .rsvp-button:hover { background: var(--ink); }
+.custom-gift button:hover, .btn--primary:hover { background: var(--ink); }
 
 .custom-gift button:disabled {
   cursor: default;
@@ -572,12 +624,6 @@ html:has(.pix-dialog[open]) { overflow: hidden; }
 
 /* ---------- Confirmação de presença ---------- */
 .section--rsvp { text-align: center; }
-
-.rsvp-button {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 36px;
-}
 
 .rsvp-alt {
   margin: 30px auto 0;
@@ -916,6 +962,8 @@ footer small {
 
 /* ---------- Celular ---------- */
 @media (max-width: 700px) {
+  .site-nav__brand { font-size: 24px; }
+  .site-nav__links a { font-size: 11px; letter-spacing: .1em; padding: 0 5px; }
   .hero__content { padding-top: 75px; }
   .hero h1 { font-size: clamp(68px, 21vw, 104px); }
   .hero__intro { font-size: 20px; margin-top: 34px; }
@@ -934,6 +982,18 @@ footer small {
 }
 
 /* Cards compactos, duas colunas, em telas estreitas */
+@media (max-width: 420px) {
+  .site-nav { padding: 0 10px; gap: 6px; }
+  .site-nav__brand { font-size: 22px; }
+  .site-nav__links { gap: 0; }
+  .site-nav__links a { letter-spacing: .06em; padding: 0 5px; }
+}
+
+@media (max-width: 350px) {
+  .site-nav { justify-content: center; }
+  .site-nav__brand { display: none; }
+}
+
 @media (max-width: 560px) {
   .gift-grid { gap: 12px; margin-top: 50px; }
   .gift__body { padding: 14px 14px 12px; }

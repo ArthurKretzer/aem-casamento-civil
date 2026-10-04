@@ -32,8 +32,17 @@
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
+  <nav class="site-nav" aria-label="Seções do site" data-testid="menu">
+    <a class="site-nav__brand" href="#inicio" aria-label="Início">A <span>&amp;</span> M</a>
+    <ul class="site-nav__links">
+      <li><a href="#celebracao">Celebração</a></li>
+      <li><a href="#presentes">Presentes</a></li>
+      <li><a href="#presenca">Presença</a></li>
+    </ul>
+  </nav>
+
   <main>
-    <section class="hero">
+    <section class="hero" id="inicio">
       <div class="botanical botanical--tl" aria-hidden="true"></div>
       <div class="botanical botanical--tr" aria-hidden="true"></div>
       <div class="botanical botanical--bl" aria-hidden="true"></div>
@@ -90,6 +99,11 @@
             <a data-testid="link-waze" href="https://waze.com/ul?q=Rua%20Santos%20Saraiva%2C%20494%2C%20Estreito%2C%20Florian%C3%B3polis&amp;navigate=yes" target="_blank" rel="noopener">Waze</a>
           </p>
         </article>
+        <article class="detail" data-testid="traje">
+          <span class="detail__label">traje</span>
+          <strong>Casual</strong>
+          <span>fique à vontade, como para um aniversário</span>
+        </article>
       </div>
     </section>
 
@@ -123,12 +137,11 @@
       </div>
     </section>
 
-    <section class="section section--rsvp">
-      <p class="section-kicker" data-testid="rsvp-prazo">até 15 de outubro</p>
+    <section class="section section--rsvp" id="presenca" data-testid="rsvp">
+      <p class="section-kicker">sua presença</p>
       <h2>Confirme sua presença.</h2>
       <p class="section-copy">Sua confirmação nos ajuda a preparar tudo com carinho.</p>
-      <a class="rsvp-button" data-testid="rsvp-botao" href="#" target="_blank" rel="noopener" hidden>confirmar presença</a>
-      <p class="rsvp-alt" data-testid="rsvp-sem-whatsapp">Confirme diretamente com a gente — vamos adorar saber que você vem.</p>
+      <p class="rsvp-alt">Fale diretamente com a gente, o Arthur ou a Marina, para confirmar.</p>
     </section>
 
     <footer>

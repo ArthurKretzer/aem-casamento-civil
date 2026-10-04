@@ -60,23 +60,15 @@ const plain = (value) => JSON.parse(JSON.stringify(value));
 const config = loadClassicScript("site/config.js", "SITE_CONFIG");
 const presentes = loadClassicScript("site/presentes.js", "PRESENTES");
 
-const isRealIsoDate = (text) => {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
-  if (!match) return false;
-  const [year, month, day] = match.slice(1).map(Number);
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
-};
-
 // ---------------------------------------------------------------------
 // site/config.js
 // ---------------------------------------------------------------------
 
 describe("site/config.js", () => {
-  it("define window.SITE_CONFIG com pix, whatsapp, rsvpPrazo e siteUrl", () => {
+  it("define window.SITE_CONFIG com pix, whatsapp e siteUrl", () => {
     assert.ok(config, "window.SITE_CONFIG não foi definido");
     assert.equal(typeof config, "object");
-    for (const key of ["pix", "whatsapp", "rsvpPrazo", "siteUrl"]) {
+    for (const key of ["pix", "whatsapp", "siteUrl"]) {
       assert.ok(key in config, `falta ${key}`);
     }
   });
@@ -91,11 +83,6 @@ describe("site/config.js", () => {
   it("whatsapp é vazio ou só dígitos com DDI 55 (12 ou 13 dígitos)", () => {
     assert.equal(typeof config.whatsapp, "string");
     if (config.whatsapp !== "") assert.match(config.whatsapp, /^55\d{10,11}$/);
-  });
-
-  it("rsvpPrazo é uma data AAAA-MM-DD que existe no calendário", () => {
-    assert.equal(typeof config.rsvpPrazo, "string");
-    assert.ok(isRealIsoDate(config.rsvpPrazo), `rsvpPrazo inválido: ${config.rsvpPrazo}`);
   });
 
   it("siteUrl é https e termina com /", () => {
@@ -265,7 +252,6 @@ describe("repositório atual", () => {
 const BASE_CONFIG = Object.freeze({
   pix: Object.freeze({ chave: "", recebedor: "", nomeQr: "ARTHUR E MARINA", cidadeQr: "SAO JOSE" }),
   whatsapp: "",
-  rsvpPrazo: "2026-10-15",
   siteUrl: "https://arthurkretzer.github.io/presentes-casamento/",
 });
 
@@ -358,12 +344,6 @@ describe("validar-dados: dados corretos", () => {
     }
   });
 
-  it("aceita datas reais no prazo da confirmação (inclusive 29 de fevereiro de ano bissexto)", () => {
-    for (const rsvpPrazo of ["2026-10-15", "2028-02-29", "2026-12-31", "2027-01-01"]) {
-      assert.deepEqual(validate({ config: { rsvpPrazo } }).errors, [], rsvpPrazo);
-    }
-  });
-
   it("aceita os limites de valor (R$ 1 e R$ 100.000) e centavos", () => {
     const gifts = [
       { id: "a", nome: "A", valor: 1 },
@@ -409,28 +389,23 @@ describe("validar-dados: ERROS em config.js", () => {
     },
     {
       name: "falta o bloco pix",
-      options: { configSource: 'window.SITE_CONFIG = { whatsapp: "", rsvpPrazo: "2026-10-15", siteUrl: "https://a.b/c/" };\n' },
+      options: { configSource: 'window.SITE_CONFIG = { whatsapp: "", siteUrl: "https://a.b/c/" };\n' },
       expect: { file: CONFIG_FILE, where: "pix", pattern: /precisa ser um bloco/ },
     },
     {
       name: "pix.chave que não é texto",
-      options: { configSource: 'window.SITE_CONFIG = { pix: { chave: 123, recebedor: "", nomeQr: "A", cidadeQr: "B" }, whatsapp: "", rsvpPrazo: "2026-10-15", siteUrl: "https://a.b/c/" };\n' },
+      options: { configSource: 'window.SITE_CONFIG = { pix: { chave: 123, recebedor: "", nomeQr: "A", cidadeQr: "B" }, whatsapp: "", siteUrl: "https://a.b/c/" };\n' },
       expect: { file: CONFIG_FILE, where: "pix.chave", pattern: /texto entre aspas/ },
     },
     {
       name: "whatsapp que não é texto",
-      options: { configSource: 'window.SITE_CONFIG = { pix: { chave: "", recebedor: "", nomeQr: "A", cidadeQr: "B" }, whatsapp: 5548999998888, rsvpPrazo: "2026-10-15", siteUrl: "https://a.b/c/" };\n' },
+      options: { configSource: 'window.SITE_CONFIG = { pix: { chave: "", recebedor: "", nomeQr: "A", cidadeQr: "B" }, whatsapp: 5548999998888, siteUrl: "https://a.b/c/" };\n' },
       expect: { file: CONFIG_FILE, where: "whatsapp", pattern: /texto entre aspas/ },
     },
     ...["48999998888", "(48) 99999-8888", "+5548999998888", "5548", "55489999888", "5548 99999 8888", "5548999998888 ", "55489999988889", "5448999998888"].map((whatsapp) => ({
       name: `whatsapp ${JSON.stringify(whatsapp)}`,
       options: { config: { whatsapp } },
       expect: { file: CONFIG_FILE, where: "whatsapp", pattern: /não é válido.*55.*5548999998888/ },
-    })),
-    ...["15/10/2026", "2026-13-01", "2026-00-10", "2026-02-30", "2026-02-29", "2026-04-31", "2026-01-00", "2026-1-5", "2026-10-15T00:00:00Z", "", "amanhã"].map((rsvpPrazo) => ({
-      name: `rsvpPrazo ${JSON.stringify(rsvpPrazo)}`,
-      options: { config: { rsvpPrazo } },
-      expect: { file: CONFIG_FILE, where: "rsvpPrazo", pattern: /AAAA-MM-DD/ },
     })),
     ...["http://arthurkretzer.github.io/presentes-casamento/", "arthurkretzer.github.io/presentes-casamento/", "//arthurkretzer.github.io/", "", "ftp://x.y/"].map((siteUrl) => ({
       name: `siteUrl ${JSON.stringify(siteUrl)} (não é https)`,
@@ -480,10 +455,10 @@ describe("validar-dados: ERROS em config.js", () => {
   }
 
   it("um erro de config não esconde os outros", () => {
-    const report = validate({ config: { whatsapp: "123", rsvpPrazo: "x", siteUrl: "http://a/" } });
+    const report = validate({ config: { whatsapp: "123", siteUrl: "http://a/" } });
     assert.deepEqual(
       report.errors.map((issue) => issue.where).sort(),
-      ["rsvpPrazo", "siteUrl", "whatsapp"]
+      ["siteUrl", "whatsapp"]
     );
   });
 
