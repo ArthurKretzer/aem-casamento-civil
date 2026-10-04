@@ -347,9 +347,9 @@ export async function checkAccessibility(page, testInfo, label) {
     console.log(`axe ${violation.impact} ${description}`);
   }
 
-  const critical = violations
-    .filter((violation) => violation.impact === "critical")
-    .map((violation) => `${violation.id}: ${violation.help}`);
-  expect(critical, `violações críticas de acessibilidade (${label})`).toEqual([]);
+  const blocking = violations
+    .filter((violation) => ["critical", "serious"].includes(violation.impact))
+    .map((violation) => `${violation.id} (${violation.impact}): ${violation.help}`);
+  expect(blocking, `violações graves de acessibilidade (${label})`).toEqual([]);
   return violations;
 }

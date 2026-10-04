@@ -153,7 +153,7 @@
     const grid = byTestId("presentes-grid");
     const cards = [];
     for (const gift of GIFTS) {
-      const cents = giftCents(gift);
+      const cents = gift ? giftCents(gift) : NaN;
       if (!gift || !gift.id || !gift.nome || !Number.isInteger(cents)) {
         console.error("[Presentes] Item inválido em presentes.js (confira id, nome e valor):", gift);
         continue;
@@ -291,11 +291,23 @@
     payloadField.value = payload;
     copyFeedback.textContent = "";
 
-    const dataUrl = renderQrCanvas(payload).toDataURL("image/png");
-    qrImage.src = dataUrl;
-    qrImage.alt = `QR Code Pix de ${amount} para Arthur & Marina`;
-    qrImage.dataset.ready = "true";
-    saveQrLink.href = dataUrl;
+    let dataUrl = "";
+    try {
+      dataUrl = renderQrCanvas(payload).toDataURL("image/png");
+    } catch (error) {
+      console.error(`[Pix] Não foi possível gerar o QR Code: ${error.message}`);
+    }
+    // Sem QR Code o Copia e Cola continua funcionando; só o bloco do QR some.
+    document.querySelector(".dialog-qr").hidden = !dataUrl;
+    if (dataUrl) {
+      qrImage.src = dataUrl;
+      qrImage.alt = `QR Code Pix de ${amount} para Arthur & Marina`;
+      qrImage.dataset.ready = "true";
+      saveQrLink.href = dataUrl;
+    } else {
+      qrImage.removeAttribute("src");
+      delete qrImage.dataset.ready;
+    }
     saveQrLink.download = `pix-arthur-e-marina-${(cents / 100).toFixed(2).replace(".", "-").replace(/-00$/, "")}.png`;
 
     if (hasWhatsapp) {
@@ -312,10 +324,15 @@
       dialog.setAttribute("open", "");
     }
     // Ajusta a altura do campo ao código inteiro (só dá para medir com o modal aberto).
-    payloadField.style.height = "auto";
-    payloadField.style.height = `${payloadField.scrollHeight + 2}px`;
+    fitPayloadField();
     copyPayloadButton.focus();
   }
+
+  function fitPayloadField() {
+    payloadField.style.height = "auto";
+    payloadField.style.height = `${payloadField.scrollHeight + 2}px`;
+  }
+  window.addEventListener("resize", () => { if (dialog.open) fitPayloadField(); });
 
   function closePix() {
     if (typeof dialog.close === "function") dialog.close();
@@ -325,16 +342,27 @@
   function setupDialog() {
     byTestId("pix-fechar").addEventListener("click", closePix);
 
-    // Clique no fundo escurecido (fora da caixa) fecha o modal.
-    dialog.addEventListener("click", (event) => {
-      if (event.target !== dialog) return;
+    // Clique no fundo escurecido (fora da caixa) fecha o modal, desde que o
+    // botão também tenha sido pressionado no fundo (arrastar uma seleção de
+    // dentro da caixa para fora não pode fechar).
+    const isOutside = (event) => {
       const rect = dialog.getBoundingClientRect();
-      const outside =
+      return (
         event.clientX < rect.left ||
         event.clientX > rect.right ||
         event.clientY < rect.top ||
-        event.clientY > rect.bottom;
-      if (outside) closePix();
+        event.clientY > rect.bottom
+      );
+    };
+    let pressedOnBackdrop = false;
+    dialog.addEventListener("pointerdown", (event) => {
+      pressedOnBackdrop = event.target === dialog && isOutside(event);
+    });
+    dialog.addEventListener("click", (event) => {
+      const startedOnBackdrop = pressedOnBackdrop;
+      pressedOnBackdrop = false;
+      if (event.target !== dialog || !startedOnBackdrop) return;
+      if (isOutside(event)) closePix();
     });
 
     dialog.addEventListener("close", () => { copyFeedback.textContent = ""; });
@@ -343,7 +371,7 @@
       const copied = await copyText(currentPayload, payloadField);
       copyFeedback.textContent = copied
         ? "Código copiado! Agora é só colar em Pix Copia e Cola no app do seu banco."
-        : "Não foi possível copiar automaticamente. O código está selecionado acima: toque e segure para copiar.";
+        : "Não foi possível copiar automaticamente. O código está selecionado abaixo: toque e segure para copiar.";
     });
 
     byTestId("pix-copiar-chave-modal").addEventListener("click", async () => {

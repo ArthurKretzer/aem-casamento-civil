@@ -1,5 +1,5 @@
 // Acessibilidade com axe-core. Todas as violações aparecem no console e nas
-// anotações do teste; o teste só FALHA em violações de impacto "critical".
+// anotações do teste; o teste FALHA em violações de impacto "critical" ou "serious".
 
 import { test } from "@playwright/test";
 import {

@@ -32,6 +32,11 @@ const CLI = path.join(ROOT, "scripts", "validar-dados.mjs");
 
 /** Chave de teste (exemplo oficial do BCB). */
 const TEST_KEY = "123e4567-e12b-12d1-a456-426655440000";
+/**
+ * Chave aleatória fictícia para os testes do validador: ele recusa de propósito a
+ * chave de exemplo do BCB (TEST_KEY), para ninguém publicar o site com ela.
+ */
+const VALIDATOR_KEY = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
 
 // ---------------------------------------------------------------------
 // Carregamento dos arquivos reais (como o navegador faria)
@@ -333,7 +338,7 @@ describe("validar-dados: dados corretos", () => {
   });
 
   it("chave + recebedor preenchidos = modo Pix ativo", () => {
-    const report = validate({ config: { pix: { chave: TEST_KEY, recebedor: "Fulano de Tal" } } });
+    const report = validate({ config: { pix: { chave: VALIDATOR_KEY, recebedor: "Marina Teste" } } });
     assert.deepEqual(report.errors, []);
     assert.deepEqual(report.warnings, []);
     assert.equal(report.pixMode, "ativo");
@@ -452,7 +457,7 @@ describe("validar-dados: ERROS em config.js", () => {
     })),
     ...["", "   "].map((recebedor) => ({
       name: `chave preenchida com recebedor ${JSON.stringify(recebedor)}`,
-      options: { config: { pix: { chave: TEST_KEY, recebedor } } },
+      options: { config: { pix: { chave: VALIDATOR_KEY, recebedor } } },
       expect: { file: CONFIG_FILE, where: "pix.recebedor", pattern: /nome do titular/ },
     })),
     ...["", "   ", "@#!", "😀"].map((nomeQr) => ({
@@ -484,7 +489,7 @@ describe("validar-dados: ERROS em config.js", () => {
 
   it("com erro no config o modo Pix continua 'em breve'", () => {
     assert.equal(validate({ config: { pix: { chave: "lixo", recebedor: "Marina" } } }).pixMode, "em breve");
-    assert.equal(validate({ config: { pix: { chave: TEST_KEY, recebedor: "" } } }).pixMode, "em breve");
+    assert.equal(validate({ config: { pix: { chave: VALIDATOR_KEY, recebedor: "" } } }).pixMode, "em breve");
   });
 });
 
@@ -675,10 +680,14 @@ describe("validar-dados: AVISOS", () => {
   });
   const IMAGE_PATH = "site/assets/img/presentes/a.jpg";
 
-  it("imagem local inexistente em site/", () => {
+  it("imagem local inexistente em site/ é ERRO (o card ficaria quebrado no ar)", () => {
     const report = validate(withImage());
-    assert.deepEqual(report.errors, []);
-    assertHas(report.warnings, { file: GIFTS_FILE, where: 'presente nº 1 ("a") › imagem', pattern: /arquivo não encontrado: site\/assets\/img\/presentes\/a\.jpg/ });
+    assertHas(report.errors, { file: GIFTS_FILE, where: 'presente nº 1 ("a") › imagem', pattern: /foto não encontrada: site\/assets\/img\/presentes\/a\.jpg/ });
+  });
+
+  it("imagem com maiúsculas/minúsculas diferentes do arquivo é ERRO (o Pages diferencia)", () => {
+    const report = validate({ ...withImage({ imagem: "assets/img/presentes/A.JPG" }), files: { [IMAGE_PATH]: Buffer.alloc(10) } });
+    assertHas(report.errors, { file: GIFTS_FILE, where: 'presente nº 1 ("a") › imagem', pattern: /maiúsculas e minúsculas/ });
   });
 
   it("imagem local que existe e é pequena: sem aviso", () => {
@@ -792,16 +801,22 @@ describe("validar-dados: linha de comando", () => {
   });
 
   it("modo Pix ativo no resumo", () => {
-    const result = run("--raiz", makeSite({ config: { pix: { chave: TEST_KEY, recebedor: "Marina" } } }));
+    const result = run("--raiz", makeSite({ config: { pix: { chave: VALIDATOR_KEY, recebedor: "Marina" } } }));
     assert.equal(result.status, 0, result.stdout);
     assert.match(result.stdout, /✔ 3 presentes, modo Pix: ativo\n?$/);
   });
 
   it("só avisos: código 0, avisos listados, resumo com ✔", () => {
-    const result = run("--raiz", makeSite({ gifts: [{ id: "a", nome: "A", valor: 100, imagem: "assets/img/presentes/a.jpg", imagemAlt: "" }] }));
+    const result = run(
+      "--raiz",
+      makeSite({
+        gifts: [{ id: "a", nome: "A", valor: 100, imagem: "assets/img/presentes/a.jpg", imagemAlt: "" }],
+        files: { "site/assets/img/presentes/a.jpg": Buffer.alloc(10) },
+      })
+    );
     assert.equal(result.status, 0, result.stdout + result.stderr);
-    assert.match(result.stdout, /AVISOS \(2\)/);
-    assert.match(result.stdout, /⚠ site\/presentes\.js › presente nº 1 \("a"\) › imagem\n\s+arquivo não encontrado: site\/assets\/img\/presentes\/a\.jpg/);
+    assert.match(result.stdout, /AVISOS \(1\)/);
+    assert.match(result.stdout, /⚠ site\/presentes\.js › presente nº 1 \("a"\) › imagemAlt\n\s+está vazio/);
     assert.match(result.stdout, /✔ 1 presente, modo Pix: em breve\n?$/);
     assert.doesNotMatch(result.stdout, /ERROS/);
   });
@@ -858,7 +873,7 @@ describe("validar-dados: linha de comando", () => {
 
 describe("validar-dados: o validador usa as mesmas regras do pix.js", () => {
   it("toda chave que normalizeKey aceita vira modo ativo; toda que recusa vira erro", () => {
-    const keys = ["", "lixo", TEST_KEY, "529.982.247-25", "529.982.247-26", "48999998888", "+55 (48) 99999-8888", "a@b.co", "a@b", "11.222.333/0001-81", "12.ABC.345/01DE-35"];
+    const keys = ["", "lixo", VALIDATOR_KEY, "529.982.247-25", "529.982.247-26", "48999998888", "+55 (48) 99999-8888", "a@b.co", "a@b", "11.222.333/0001-81", "12.ABC.345/01DE-35"];
     for (const chave of keys) {
       let accepted = true;
       try {
@@ -887,5 +902,20 @@ describe("validar-dados: o validador usa as mesmas regras do pix.js", () => {
       assert.ok(Number.isInteger(cents), String(valor));
       assert.equal(PixBR.validatePayload(PixBR.buildPixPayload({ key: TEST_KEY, name: "A", city: "B", cents })).ok, true);
     }
+  });
+});
+
+describe("validar-dados: dados de exemplo não podem ir ao ar", () => {
+  it("a chave de exemplo do BCB é recusada (em qualquer caixa)", () => {
+    for (const chave of [TEST_KEY, TEST_KEY.toUpperCase()]) {
+      const report = validate({ config: { pix: { chave, recebedor: "Marina" } } });
+      assert.equal(report.pixMode, "em breve", chave);
+      assertHas(report.errors, { file: CONFIG_FILE, where: "pix.chave", pattern: /chave de EXEMPLO do Banco Central/ });
+    }
+  });
+
+  it('o recebedor de exemplo "Fulano de Tal" é recusado', () => {
+    const report = validate({ config: { pix: { chave: VALIDATOR_KEY, recebedor: "Fulano de Tal" } } });
+    assertHas(report.errors, { file: CONFIG_FILE, where: "pix.recebedor", pattern: /nome de exemplo/ });
   });
 });

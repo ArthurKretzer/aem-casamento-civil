@@ -29,6 +29,19 @@ import {
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
 test.describe("Pix ativo: página", () => {
+  test("parâmetros na URL (?chave=, #chave=...) não alteram a chave nem o recebedor", async ({ page }) => {
+    await openActiveSite(page);
+    await page.goto("./?chave=ATACANTE&pixKey=x&recebedor=Fraudador&whatsapp=5511999999999#chave=ATACANTE");
+    await expect(page.getByTestId("pix-chave")).toHaveText(TEST_KEY);
+    await expect(page.getByTestId("pix-recebedor")).toHaveText(TEST_RECEIVER);
+    await openGift(page, requireGift(1).index);
+    const payload = await page.getByTestId("pix-payload").inputValue();
+    expect(payload).toContain(`0136${TEST_KEY}`);
+    expect(payload).not.toContain("ATACANTE");
+    await expect(page.getByTestId("pix-recebedor-modal")).toHaveText(TEST_RECEIVER);
+    await expect(page.getByTestId("pix-avisar")).toHaveAttribute("href", new RegExp(`^https://wa\\.me/${TEST_WHATSAPP}\\?`));
+  });
+
   test("a seção Pix mostra a chave normalizada e o recebedor", async ({ page }) => {
     await openActiveSite(page);
     await expect(page.getByTestId("pix-em-breve")).toBeHidden();

@@ -7,7 +7,7 @@
   "scripts": {
     "servir": "node scripts/servir.mjs",
     "validar": "node scripts/validar-dados.mjs",
-    "test:unit": "node --test tests/unit/*.test.mjs",
+    "test:unit": "node --test \"tests/unit/*.test.mjs\"",
     "test:e2e": "playwright test",
     "test": "npm run validar && npm run test:unit"
   },
@@ -23,6 +23,6 @@
     "qrcode-generator": "2.0.4"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

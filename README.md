@@ -27,7 +27,7 @@ Dá para editar os arquivos direto no GitHub, pelo navegador, sem instalar nada:
 4. Clique em **Commit changes...**, deixe marcado **Commit directly to the `main` branch** e confirme.
 5. Pronto. O GitHub testa e publica sozinho em poucos minutos (veja [Publicação](#publicação)).
 
-Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida, uma foto que não existe), os testes mostram o motivo (o passo "Validar os dados do site" explica em português o que corrigir) e **o site novo não é publicado**: o que já está no ar continua como estava. Nada quebra.
+Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida, uma foto que não existe), os testes mostram o motivo (o passo "Validar os dados do site" explica em português o que corrigir) e, como a falha acontece **antes da publicação**, o site novo não é publicado: o que já está no ar continua como estava.
 
 ### config.js
 
@@ -96,6 +96,8 @@ O dinheiro dos presentes cai direto na conta de vocês, então vale cuidar bem d
 - [ ] Os dois testes (QR Code e Copia e Cola) em **2 bancos diferentes**, por exemplo um banco tradicional e uma conta digital.
 - [ ] Em cada teste: o nome do recebedor na tela do banco é o esperado, o valor é o certo e o dinheiro apareceu no extrato.
 - [ ] A chave exibida na seção "Sem intermediários" é a de vocês.
+- [ ] `whatsapp` preenchido no `config.js` e o botão **confirmar presença** abre a conversa certa (lembrem que o número fica público no site e no repositório).
+- [ ] `rsvpPrazo` com a data certa (hoje: 15 de outubro). Depois do prazo o site continua mostrando a data; se quiserem, esvaziem `whatsapp` para esconder o botão.
 
 ### Depois do casamento
 
@@ -119,9 +121,10 @@ O site é publicado no **GitHub Pages**, pelo **GitHub Actions**. Cada alteraç�
 Aba **Actions** do repositório, fluxo **Site**, execução mais recente:
 
 - ícone verde: testado, publicado e conferido no ar;
-- ícone vermelho: alguma etapa falhou. Abra o job que falhou e leia a mensagem. O site que está no ar **não é afetado**.
+- ícone vermelho em **Testes** ou em **Publicar no GitHub Pages**: nada novo foi ao ar; o site continua como estava. Abra o job que falhou, leia a mensagem, corrija e faça outro commit.
+- ícone vermelho só em **Verificar o site no ar**: a versão nova **já está no ar**, mas algo não passou na conferência final. Abra o site, confira a seção Pix e os presentes e, se algo estiver errado, corrija o arquivo e faça outro commit (ou volte à versão anterior, como explicado abaixo).
 
-O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma alteração que já foi ao ar, abra o commit no GitHub e use **Revert**: isso gera um commit novo que volta ao estado anterior e publica de novo.
+O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma alteração que já foi ao ar: abra o arquivo no GitHub, clique em **History**, abra a versão anterior (botão **View file** / `<>`), copie o conteúdo, cole no arquivo atual (lápis **Edit this file**) e faça o commit. Isso publica de novo a versão antiga.
 
 ### O que cada job faz
 
@@ -131,13 +134,13 @@ O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma
 | `publicar` | Só na `main`, depois de `testes` passar | Grava a versão (o código do commit) em `site/version.txt` e publica a pasta `site/` no GitHub Pages. |
 | `verificar` | Depois de `publicar` | Espera (até 10 minutos) a versão nova aparecer em `.../version.txt` e então repete os testes do navegador **contra o site de verdade**. |
 
-Se um dia o endereço mudar (por exemplo, um domínio próprio), atualizem `siteUrl` no `config.js` e as URLs `og:url` e `og:image` no `site/index.html`, que precisam ser absolutas.
+Se um dia o endereço mudar (por exemplo, um domínio próprio), atualizem a URL em todos estes lugares: `siteUrl` no `config.js`; `og:url`, `og:image` e o link do Google Agenda (parâmetro `details=`) no `site/index.html`; e `UID`, `DESCRIPTION` e `URL` no `site/casamento.ics`.
 
 ---
 
 ## Desenvolvimento local
 
-Precisa do [Node.js](https://nodejs.org) 22 (ou 20).
+Precisa do [Node.js](https://nodejs.org) 22 ou mais novo.
 
 ```sh
 npm install                       # instala as dependências (uma vez)

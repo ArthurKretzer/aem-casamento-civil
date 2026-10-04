@@ -19,6 +19,13 @@ on:
 permissions:
   contents: read
 
+# Uma execução por branch de cada vez: commits seguidos na main não se
+# atropelam (testar -> publicar -> verificar sempre da mesma versão). Se
+# chegarem vários enquanto uma roda, só o mais recente fica na fila.
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   # 1) Testes: rodam em todas as branches.
   testes:

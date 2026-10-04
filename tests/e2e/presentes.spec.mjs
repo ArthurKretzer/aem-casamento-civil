@@ -25,7 +25,7 @@ test.describe("Presentes", () => {
     }
   });
 
-  test("as fotos carregam (ou o card mostra o espaço reservado)", async ({ page }) => {
+  test("todas as fotos carregam (presente sem foto mostra o espaço reservado)", async ({ page }) => {
     await openSite(page);
     for (const [index, gift] of PRESENTES.entries()) {
       const card = page.getByTestId("presente-card").nth(index);

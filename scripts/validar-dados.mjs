@@ -36,6 +36,8 @@ const MAX_VALUE_REAIS = 100000;
 
 const CONFIG_KEYS = ["pix", "whatsapp", "rsvpPrazo", "siteUrl"];
 const PIX_KEYS = ["chave", "recebedor", "nomeQr", "cidadeQr"];
+// Chave do exemplo oficial do Banco Central: aparece no README e nos testes, nunca no site.
+const EXAMPLE_KEY = "123e4567-e12b-12d1-a456-426655440000";
 const GIFT_KEYS = ["id", "nome", "valor", "imagem", "imagemAlt", "descricao", "esgotado"];
 
 // ---------------------------------------------------------------------
@@ -212,11 +214,18 @@ function checkConfig(rootDir, addError, addWarning) {
 
   if (key !== "") {
     try {
-      PixBR.normalizeKey(key);
-      keyOk = true;
+      const normalized = PixBR.normalizeKey(key);
+      if (normalized.value === EXAMPLE_KEY) {
+        error("pix.chave", "esta é a chave de EXEMPLO do Banco Central (usada na documentação e nos testes), não a de vocês. Cadastre uma chave aleatória no app do banco e cole aqui.");
+      } else {
+        keyOk = true;
+      }
     } catch (caught) {
       if (!(caught instanceof PixBR.PixError)) throw caught;
       error("pix.chave", caught.message);
+    }
+    if (/^fulano de tal$/i.test(holder)) {
+      error("pix.recebedor", "\"Fulano de Tal\" é o nome de exemplo; use o nome do titular exatamente como o app do banco mostra.");
     }
     if (holder === "") {
       error(
@@ -387,8 +396,13 @@ function checkGiftImage(gift, siteDir, error, warning) {
         stat = null;
       }
       const display = "site/" + inside.split(path.sep).join("/");
-      if (!stat || !stat.isFile()) {
-        warning("imagem", "arquivo não encontrado: " + display + ". Até a foto existir, o card mostra um quadro vazio no lugar.");
+      // O GitHub Pages diferencia maiúsculas de minúsculas, mesmo que o disco local não diferencie.
+      const exactName = stat && stat.isFile() && fs.readdirSync(path.dirname(resolved)).includes(path.basename(resolved));
+      if (!stat || !stat.isFile() || !exactName) {
+        error(
+          "imagem",
+          "foto não encontrada: " + display + ". Confira o nome do arquivo (inclusive maiúsculas e minúsculas) e se a foto foi enviada para site/assets/img/presentes/."
+        );
       } else if (stat.size > MAX_IMAGE_BYTES) {
         warning(
           "imagem",
