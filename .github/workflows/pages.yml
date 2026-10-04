@@ -1,0 +1,162 @@
+# Fluxo do site: testa toda alteração e publica no GitHub Pages quando ela
+# chega na branch "main". Se qualquer teste falhar, nada é publicado e o site
+# que está no ar continua como estava.
+#
+# Primeira configuração (uma vez só, no GitHub):
+#   Settings -> Pages -> Build and deployment -> Source: "GitHub Actions"
+# Veja o README para o passo a passo completo.
+
+name: Site
+
+on:
+  # Qualquer branch: testes rodam em todas; só a "main" publica.
+  push:
+    branches: ["**"]
+  # Botão "Run workflow" na aba Actions (útil para publicar de novo).
+  workflow_dispatch:
+
+# Permissão mínima por padrão; o job de publicação pede o que precisa.
+permissions:
+  contents: read
+
+jobs:
+  # 1) Testes: rodam em todas as branches.
+  testes:
+    name: Testes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      - name: Preparar o Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      # Confere os arquivos que os noivos editam (config.js e presentes.js).
+      - name: Validar os dados do site
+        run: npm run validar
+
+      # Pix (chave, valor, CRC, QR Code) e funções de apoio, sem navegador.
+      - name: Testes unitários
+        run: npm run test:unit
+
+      - name: Instalar o Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      # Sobe o site local (com o subcaminho do Pages) e testa no navegador,
+      # em versão desktop e celular.
+      - name: Testes de ponta a ponta
+        run: npx playwright test
+
+      - name: Guardar os resultados dos testes (só se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-testes
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  # 2) Publicação: só na "main" e só depois de os testes passarem.
+  publicar:
+    name: Publicar no GitHub Pages
+    needs: testes
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read # ler o código (a permissão do job substitui a do topo)
+      pages: write # publicar no Pages
+      id-token: write # provar ao Pages que a publicação veio deste fluxo
+    # Uma publicação por vez; as seguintes esperam na fila (não cancelam).
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      # O verificador compara este arquivo com o que está no ar.
+      - name: Gravar a versão que será publicada
+        run: echo "$GITHUB_SHA" > site/version.txt
+
+      - name: Configurar o Pages
+        uses: actions/configure-pages@v6
+
+      - name: Empacotar a pasta site/
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Publicar
+        id: deployment
+        uses: actions/deploy-pages@v5
+
+  # 3) Verificação: confere se o site NO AR é mesmo esta versão e repete os
+  #    testes de navegador contra o endereço público.
+  verificar:
+    name: Verificar o site no ar
+    needs: publicar
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      PAGE_URL: ${{ needs.publicar.outputs.page_url }}
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v7
+
+      # O Pages pode levar alguns instantes para trocar a versão. Pergunta a
+      # cada 15 s (com um parâmetro aleatório, para furar o cache) por até 10 min.
+      - name: Esperar a versão nova aparecer no ar
+        run: |
+          base="${PAGE_URL%/}/"
+          limite=$((SECONDS + 600))
+          while [ "$SECONDS" -lt "$limite" ]; do
+            no_ar="$(curl -fsS --max-time 20 "${base}version.txt?cb=${RANDOM}${RANDOM}" 2>/dev/null | tr -d '[:space:]' || true)"
+            echo "No ar: ${no_ar:-<nada ainda>} | esperado: ${GITHUB_SHA}"
+            if [ "$no_ar" = "$GITHUB_SHA" ]; then
+              echo "A versão nova já está no ar em ${base}"
+              exit 0
+            fi
+            sleep 15
+          done
+          echo "::error::A versão ${GITHUB_SHA} não apareceu em ${base} em 10 minutos."
+          exit 1
+
+      - name: Preparar o Node 22
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar o Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      # BASE_URL faz o Playwright testar o endereço público em vez do servidor local.
+      - name: Testes de ponta a ponta no site publicado
+        run: npx playwright test
+        env:
+          BASE_URL: ${{ needs.publicar.outputs.page_url }}
+
+      - name: Guardar os resultados dos testes (só se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: resultados-testes-producao
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore

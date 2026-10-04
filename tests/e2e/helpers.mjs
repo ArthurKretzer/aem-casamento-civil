@@ -303,6 +303,16 @@ export function readClipboard(page) {
   });
 }
 
+// Põe um texto "marcador" na área de transferência antes de copiar. Sem isso,
+// um teste poderia passar por engano com o que outro teste copiou antes (o
+// Chromium compartilha a área de transferência entre os testes de um worker).
+export const CLIPBOARD_MARKER = "(marcador do teste)";
+
+export async function seedClipboard(page, text = CLIPBOARD_MARKER) {
+  await page.evaluate((value) => Clipboard.prototype.writeText.call(navigator.clipboard, value), text);
+  expect(await readClipboard(page), "marcador na área de transferência").toBe(text);
+}
+
 // ---------- Acessibilidade ----------
 // Registra todas as violações (anotações + console) e só falha nas críticas.
 export async function checkAccessibility(page, testInfo, label) {

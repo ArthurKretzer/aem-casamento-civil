@@ -51,6 +51,10 @@
 
     const PHONE_HINT = "Se for telefone, use o formato +55DDNÚMERO (ex.: +5548999998888).";
 
+    const hasOwn = function (object, key) {
+      return Object.prototype.hasOwnProperty.call(object, key);
+    };
+
     const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     // Validação básica (parte local + domínio com ponto), já em minúsculas.
     const EMAIL_RE =
@@ -92,7 +96,7 @@
     function normalizeText(value, maxLength) {
       let text = (value === null || value === undefined ? "" : String(value))
         .normalize("NFD")
-        .replace(/[̀-ͯ]/g, "") // acentos viram letras simples
+        .replace(/[\u0300-\u036f]/g, "") // acentos viram letras simples
         .replace(/&/g, " E ") // espaços em volta evitam "A&B" -> "AEB"
         .replace(/\s+/g, " ") // tab, quebra de linha e NBSP viram espaço
         .replace(/[^A-Za-z0-9 $%*+\-./:]/g, "")
@@ -438,8 +442,8 @@
         const head = text.slice(pos, pos + 4);
         if (!/^\d{4}$/.test(head)) {
           errors.push(
-            label + ": sobrou texto ou há um campo mal formado na posição " + pos + ' ("' + text.slice(pos, pos + 12) +
-              (text.length - pos > 12 ? "..." : "") + '"). Esperava 2 dígitos de id e 2 de tamanho.'
+            label + ": texto inesperado na posição " + pos + ' ("' + text.slice(pos, pos + 12) + (text.length - pos > 12 ? "..." : "") +
+              '"): sobrou lixo no fim ou o tamanho de um campo anterior está inconsistente (cada campo começa com 2 dígitos de id e 2 de tamanho).'
           );
           break;
         }
@@ -452,7 +456,7 @@
           );
           break;
         }
-        if (Object.prototype.hasOwnProperty.call(map, id)) {
+        if (hasOwn(map, id)) {
           errors.push(label + ": o campo " + id + " aparece mais de uma vez.");
         } else {
           map[id] = value;
@@ -497,15 +501,14 @@
         ["62", "dados adicionais"],
         ["63", "CRC"],
       ];
+      const has = function (id) {
+        return hasOwn(top.map, id);
+      };
       required.forEach(function (item) {
-        if (!Object.prototype.hasOwnProperty.call(top.map, item[0])) {
+        if (!has(item[0])) {
           errors.push("Campo obrigatório ausente: " + item[0] + " (" + item[1] + ").");
         }
       });
-
-      const has = function (id) {
-        return Object.prototype.hasOwnProperty.call(top.map, id);
-      };
 
       // Posição dos campos 00 (primeiro) e 63 (último).
       if (top.order.length > 0 && top.order[0] !== "00" && has("00")) {
@@ -537,12 +540,12 @@
         const account = parseTlv(top.map["26"], "Campo 26");
         errors.push.apply(errors, account.errors);
         fields["26"] = account.map;
-        if (!Object.prototype.hasOwnProperty.call(account.map, "00")) {
+        if (!hasOwn(account.map, "00")) {
           errors.push("Campo obrigatório ausente: 26.00 (GUI br.gov.bcb.pix).");
         } else if (account.map["00"].toLowerCase() !== GUI) {
           errors.push('O campo 26.00 (GUI) deve ser "' + GUI + '", mas é "' + account.map["00"] + '".');
         }
-        if (!Object.prototype.hasOwnProperty.call(account.map, "01") || account.map["01"] === "") {
+        if (!hasOwn(account.map, "01") || account.map["01"] === "") {
           errors.push("Campo obrigatório ausente: 26.01 (chave Pix).");
         }
       }
@@ -573,7 +576,7 @@
         const extra = parseTlv(top.map["62"], "Campo 62");
         errors.push.apply(errors, extra.errors);
         fields["62"] = extra.map;
-        if (!Object.prototype.hasOwnProperty.call(extra.map, "05") || extra.map["05"] === "") {
+        if (!hasOwn(extra.map, "05") || extra.map["05"] === "") {
           errors.push("Campo obrigatório ausente: 62.05 (txid; use *** se não houver).");
         } else if (extra.map["05"] !== "***" && !TXID_RE.test(extra.map["05"])) {
           errors.push('O campo 62.05 (txid) deve ser "***" ou ter de 1 a ' + MAX_TXID + " letras e números.");

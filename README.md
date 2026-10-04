@@ -1,39 +1,207 @@
-# Arthur & Marina — site de casamento
+# Arthur & Marina — site do casamento
 
-Site estático pronto para publicar na Vercel.
+Site do casamento civil de Arthur & Marina: **segunda-feira, 16 de novembro de 2026, às 19h**, no Edifício Vila Salomy (Estreito, Florianópolis).
 
-## 1. Configurar o Pix
+**No ar em: <https://arthurkretzer.github.io/presentes-casamento/>**
 
-Abra `script.js` e altere:
+O que tem nele: a data e o local (com links para Google Maps, Waze e agenda), a lista de presentes com **Pix direto para vocês** (QR Code e Pix Copia e Cola já com o valor preenchido, sem plataforma no meio), um campo de valor livre e a confirmação de presença pelo WhatsApp.
+
+O site é estático (só HTML, CSS e JavaScript), não usa banco de dados nem serviços externos e **não aparece no Google** (`noindex`): só chega nele quem recebe o link.
+
+---
+
+## Como editar
+
+Quase tudo o que muda fica em dois arquivos dentro da pasta `site/`:
+
+- `site/config.js`: Pix, WhatsApp e prazo de confirmação;
+- `site/presentes.js`: a lista de presentes.
+
+Dá para editar os dois direto no GitHub, pelo navegador, sem instalar nada:
+
+1. Abra o repositório no GitHub, entre em `site/` e clique no arquivo (`config.js` ou `presentes.js`).
+2. Clique no lápis (**Edit this file**), no canto direito acima do texto.
+3. Faça a alteração. Mantenha as aspas, as vírgulas no fim das linhas e as chaves `{ }` como estão.
+4. Clique em **Commit changes...**, deixe marcado **Commit directly to the `main` branch** e confirme.
+5. Pronto. O GitHub testa e publica sozinho em poucos minutos (veja [Publicação](#publicação)).
+
+Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida, uma foto que não existe), os testes mostram o motivo (o passo "Validar os dados do site" explica em português o que corrigir) e **o site novo não é publicado**: o que já está no ar continua como estava. Nada quebra.
+
+### config.js
+
+| Campo | O que colocar |
+| --- | --- |
+| `pix.chave` | A chave Pix que recebe os presentes. **Vazia (`""`) = o site mostra "Pix em breve"** (veja abaixo). Use uma chave aleatória (veja [Pix: recomendações de segurança](#pix-recomendações-de-segurança)). |
+| `pix.recebedor` | O nome do titular **exatamente como o app do banco mostra** na hora de pagar. Os convidados conferem esse nome antes de confirmar. |
+| `pix.nomeQr` | Nome gravado dentro do QR Code: sem acentos, até 25 letras (ex.: `"ARTHUR E MARINA"`). |
+| `pix.cidadeQr` | Cidade gravada no QR Code: sem acentos, até 15 letras (ex.: `"SAO JOSE"`). |
+| `whatsapp` | DDI + DDD + número, só dígitos (ex.: `"5548999998888"`). **Vazio = os botões de WhatsApp somem** e aparece um texto pedindo para confirmar direto com vocês. |
+| `rsvpPrazo` | Data limite para confirmar presença, no formato `AAAA-MM-DD` (ex.: `"2026-10-15"`). O site mostra "até 15 de outubro". |
+| `siteUrl` | Endereço público do site, terminando em `/`. |
+
+### O modo "Pix em breve"
+
+Enquanto `pix.chave` estiver vazia, o site funciona normalmente, mas os botões de presente ficam desabilitados ("Pix em breve"), o valor livre fica travado e **nenhum QR Code ou chave aparece**. É assim que o site vai ao ar primeiro, antes de a chave existir.
+
+Para ligar o Pix, preencha `chave` **e** `recebedor`. O site só ativa o Pix quando a chave é válida, o recebedor está preenchido e um código de teste passa na validação; se a chave estiver preenchida mas errada, ele continua em "Pix em breve" e o teste do GitHub acusa o erro (então nada errado vai ao ar).
+
+### Adicionar, trocar ou tirar um presente
+
+Em `site/presentes.js` cada presente é um bloco `{ ... }`, e a ordem do arquivo é a ordem no site. Para adicionar, copie um bloco inteiro (com a vírgula no final) e ajuste:
 
 ```js
-const CONFIG = {
-  pixKey: "SUA-CHAVE-PIX-AQUI",
-  merchantName: "ARTHUR E MARINA",
-  merchantCity: "SAO JOSE",
-  whatsapp: "55SEUNUMEROAQUI"
-};
+  {
+    id: "lua-de-mel",                                  // único: minúsculas, números e "-"
+    nome: "Nossa lua de mel",                          // o que aparece no card
+    valor: 250,                                        // em reais, com ponto: 150 ou 150.5
+    imagem: "assets/img/presentes/lua-de-mel.jpg",     // opcional
+    imagemAlt: "Praia ao entardecer",                  // opcional: descrição da foto
+    descricao: "Uma noite só para nós dois.",          // opcional: frase curta
+  },
 ```
 
-A chave pode ser e-mail, telefone, CPF/CNPJ ou chave aleatória.
+- **Esgotado**: acrescente `esgotado: true,` e o card passa a mostrar "já presenteado".
+- **Tirar um presente**: apague o bloco inteiro.
+- O card de "outro valor" (valor livre) já existe e não entra nessa lista.
+- Valores aceitos: de R$ 1,00 a R$ 100.000,00.
 
-O site gera um Pix BR Code com o valor preenchido para cada opção de presente.
+### Fotos dos presentes
 
-## 2. Publicar na Vercel
+- Formato: **JPEG, 960×720 (proporção 4:3), até uns 150 KB**. Fotos maiores deixam a página pesada no celular.
+- Pasta: `site/assets/img/presentes/`. No GitHub: entre na pasta, **Add file → Upload files**, arraste a foto e faça o commit.
+- Nome do arquivo em minúsculas, sem acento e sem espaço (`lua-de-mel.jpg`), igual ao que está em `imagem:`. O site publicado diferencia maiúsculas de minúsculas, então `Lua-de-Mel.JPG` não é a mesma coisa que `lua-de-mel.jpg`.
+- Bancos de imagens gratuitos: [Unsplash](https://unsplash.com), [Pexels](https://www.pexels.com) e [Wikimedia Commons](https://commons.wikimedia.org). Confira a licença de cada foto e **anote o crédito** na seção [Fotos](#fotos) lá embaixo.
+- Para redimensionar e comprimir sem programa nenhum: [squoosh.app](https://squoosh.app) (escolha JPEG, largura 960 e qualidade perto de 75).
+- Presente sem foto não tem problema: o card mostra um ornamento dourado no lugar.
 
-1. Crie um repositório no GitHub.
-2. Envie `index.html`, `styles.css` e `script.js`.
-3. Entre na Vercel.
-4. Add New → Project.
-5. Selecione o repositório.
-6. Deploy.
+---
 
-Não é necessário build command nem banco de dados.
+## Pix: recomendações de segurança
 
-## 3. Personalização
+O dinheiro dos presentes cai direto na conta de vocês, então vale cuidar bem do caminho até ela.
 
-Os principais textos e valores estão em `index.html`.
+1. **Use uma chave ALEATÓRIA.** É um código (algo como `123e4567-e12b-12d1-a456-426655440000`) que o banco gera para vocês: app do banco → Pix → cadastrar chave → chave aleatória. Por quê: o `config.js` fica num repositório público e a chave aparece no site; com a aleatória, ninguém descobre o CPF, o telefone ou o e-mail de vocês, e dá para apagá-la depois do casamento sem mexer nas chaves do dia a dia.
+2. **`recebedor` = o nome exato que o banco mostra.** Faça um Pix de teste de outra conta para a chave e copie o nome como aparece na tela de confirmação. É esse nome que o convidado vê no app dele e compara com o que está no site.
+3. **Nunca aceitem uma chave que chegue por link ou mensagem.** O site lê a chave só do `config.js` e ignora qualquer coisa que venha no endereço (como `?chave=...`), justamente para ninguém conseguir montar um link que faça os convidados pagarem para outra pessoa. Desconfiem de qualquer pedido para "trocar a chave" por mensagem e só mudem a chave pelo próprio GitHub.
+4. **Ative a verificação em duas etapas (2FA) no GitHub** (Settings → Password and authentication). Quem entrar na conta de vocês consegue trocar a chave que o site mostra. Guardem os códigos de recuperação e deixem só vocês dois com acesso de escrita ao repositório (Settings → Collaborators).
+5. **Opcional: uma conta separada só para os presentes.** Uma conta (ou subconta) nova, com a chave aleatória dela, facilita ver o que entrou e limita o estrago se algo der errado.
 
-Para trocar a aparência, use `styles.css`.
+### Checklist antes de divulgar o link
 
-O site usa fontes do Google Fonts e QRCode.js via CDN.
+- [ ] Chave aleatória criada; `pix.chave` e `pix.recebedor` preenchidos no `config.js`; commit feito e a aba **Actions** com o ícone verde.
+- [ ] Pelo **celular**, no site publicado, um **Pix real de R$ 1 pelo QR Code** (use "outro valor" e digite `1`).
+- [ ] Outro **Pix real de R$ 1 pelo Pix Copia e Cola**.
+- [ ] Os dois testes em **2 bancos diferentes** (por exemplo, um banco tradicional e uma conta digital).
+- [ ] Em cada teste: o nome do recebedor na tela do banco é o esperado, o valor é o certo e o dinheiro apareceu no extrato.
+- [ ] A chave exibida na seção "Sem intermediários" é a de vocês.
+
+### Depois do casamento
+
+- **Apaguem a chave aleatória no app do banco** (ou troquem por outra). O QR Code e o Copia e Cola antigos deixam de funcionar, mesmo que alguém tenha guardado o link ou uma captura de tela.
+- No site: esvaziem `pix.chave` (volta para "Pix em breve") ou removam a seção de presentes do `site/index.html`.
+
+---
+
+## Publicação
+
+O site é publicado no **GitHub Pages**, pelo **GitHub Actions**. Cada alteração enviada para a branch `main` dispara o fluxo **Site** (arquivo `.github/workflows/pages.yml`), que testa e publica.
+
+### Primeira configuração (uma vez só)
+
+1. O repositório precisa ser **público** (é o que o GitHub Pages gratuito exige).
+2. Vá em **Settings → Pages → Build and deployment → Source** e escolha **GitHub Actions**.
+3. Envie um commit para a `main` (ou vá em **Actions → Site → Run workflow**). O endereço aparece no fim da execução.
+
+### Como acompanhar
+
+Aba **Actions** do repositório, fluxo **Site**, execução mais recente:
+
+- ícone verde: testado, publicado e conferido no ar;
+- ícone vermelho: alguma etapa falhou. Abra o job que falhou e leia a mensagem. O site que está no ar **não é afetado**.
+
+O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma alteração que já foi ao ar, abra o commit no GitHub e use **Revert**: isso gera um commit novo que volta ao estado anterior e publica de novo.
+
+### O que cada job faz
+
+| Job | Quando roda | O que faz |
+| --- | --- | --- |
+| `testes` | Em **todas** as branches | Instala as dependências, valida `config.js` e `presentes.js` (`npm run validar`), roda os testes unitários do Pix (`npm run test:unit`) e os testes no navegador (`npx playwright test`, em versão desktop e celular). |
+| `publicar` | Só na `main`, depois de `testes` passar | Grava a versão (o código do commit) em `site/version.txt` e publica a pasta `site/` no GitHub Pages. |
+| `verificar` | Depois de `publicar` | Espera (até 10 minutos) a versão nova aparecer em `.../version.txt` e então repete os testes do navegador **contra o site de verdade**. |
+
+Se um dia o endereço mudar (por exemplo, um domínio próprio), atualizem `siteUrl` no `config.js` e as URLs `og:url` e `og:image` no `site/index.html`, que precisam ser absolutas.
+
+---
+
+## Desenvolvimento local
+
+Precisa do [Node.js](https://nodejs.org) 22 (ou 20).
+
+```sh
+npm install                       # instala as dependências (uma vez)
+npx playwright install chromium   # baixa o navegador dos testes (uma vez)
+
+npm run servir                    # site em http://127.0.0.1:4173/presentes-casamento/
+npm test                          # valida config/presentes + testes unitários
+npx playwright test               # testes no navegador (sobe o servidor sozinho)
+```
+
+O servidor local serve a pasta `site/` sob `/presentes-casamento/`, igual ao GitHub Pages, por isso **todos os caminhos do site são relativos** (sem `/` no começo).
+
+Outras formas de rodar os testes no navegador:
+
+```sh
+npx playwright test --project=mobile          # só a versão celular
+npx playwright test -g "valor livre"          # só testes com esse nome
+npx playwright test --ui                      # modo visual, bom para depurar
+
+# testar o site já publicado (em vez do servidor local)
+BASE_URL=https://arthurkretzer.github.io/presentes-casamento/ npx playwright test
+
+# gerar capturas de tela (vão para test-results/screenshots/)
+SCREENSHOTS=1 npx playwright test screenshots
+```
+
+No Windows (PowerShell), defina a variável antes: `$env:BASE_URL="https://..."; npx playwright test`.
+
+Os testes de navegador usam uma chave Pix de teste injetada na hora (a do exemplo do Banco Central), então rodam igual com a chave real vazia ou preenchida. Quando a chave real está preenchida, `tests/e2e/config-real.spec.mjs` confere o Pix de cada presente com ela.
+
+### Estrutura de pastas
+
+```text
+site/                        tudo o que vai ao ar (só esta pasta é publicada)
+  index.html                 a página
+  config.js                  dados dos noivos: Pix, WhatsApp, prazo     <- vocês editam
+  presentes.js               lista de presentes                         <- vocês editam
+  casamento.ics              evento para agenda (Apple, Outlook)
+  assets/
+    css/styles.css           visual do convite
+    js/pix.js                Pix: chave, valor, Copia e Cola, CRC
+    js/app.js                comportamento da página (cards, modal, QR Code)
+    vendor/qrcode.js         gerador de QR Code
+    fonts/                   fontes (woff2) servidas pelo próprio site
+    img/                     prévia do link, ícones e presentes/ (fotos)
+scripts/
+  servir.mjs                 servidor local (npm run servir)
+  validar-dados.mjs          confere config.js e presentes.js (npm run validar)
+  gerar-assets.mjs           gera a prévia do link e os ícones
+tests/
+  unit/                      testes do Pix e da validação (node --test)
+  e2e/                       testes no navegador (Playwright)
+.github/workflows/pages.yml  testa e publica
+playwright.config.mjs        configuração dos testes de navegador
+CLAUDE.md                    instruções para futuras sessões do Claude
+```
+
+---
+
+## Créditos
+
+- **Convite e identidade visual:** Marina (protótipo original do site).
+- **Fontes:** Cormorant Garamond, Great Vibes e Montserrat, sob a licença [SIL Open Font License 1.1](https://openfontlicense.org), empacotadas pelo [Fontsource](https://fontsource.org) (texto da licença em `site/assets/fonts/LICENCAS-OFL.txt`).
+- **QR Code:** [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), de Kazuhiko Arase, licença MIT (`site/assets/vendor/qrcode.js`).
+- **Testes (só desenvolvimento):** Playwright, axe-core, jsQR, pngjs e pix-utils.
+
+### Fotos
+
+<!-- CREDITOS-FOTOS -->

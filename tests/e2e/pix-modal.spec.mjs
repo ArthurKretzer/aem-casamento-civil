@@ -5,6 +5,7 @@
 import fs from "node:fs";
 import { expect, test } from "@playwright/test";
 import {
+  CLIPBOARD_MARKER,
   PRESENTES,
   TEST_KEY,
   TEST_RECEIVER,
@@ -16,6 +17,7 @@ import {
   openActiveSite,
   openGift,
   readClipboard,
+  seedClipboard,
   toCents,
   watchPage,
 } from "./helpers.mjs";
@@ -84,6 +86,7 @@ test.describe("Pix ativo: modal", () => {
     await openGift(page, SECOND);
     const payload = await expectDialogContent(page, second);
 
+    await seedClipboard(page);
     await page.getByTestId("pix-copiar").click();
     await expect.poll(() => readClipboard(page), { message: "área de transferência" }).toBe(payload);
     await expect(page.getByTestId("pix-feedback")).toHaveText(/copiad/i);
@@ -102,10 +105,12 @@ test.describe("Pix ativo: modal", () => {
     await openGift(page, SECOND);
     const payload = await expectDialogContent(page, second);
 
+    await seedClipboard(page);
     await page.getByTestId("pix-copiar").click();
     const feedback = page.getByTestId("pix-feedback");
     await expect(feedback).toHaveText(/\S/);
     await expect(feedback, "o aviso não pode dizer que copiou").not.toHaveText(/copiado/i);
+    expect(await readClipboard(page), "nada foi copiado de verdade").toBe(CLIPBOARD_MARKER);
     const selection = await page.getByTestId("pix-payload").evaluate((field) => ({
       start: field.selectionStart,
       end: field.selectionEnd,
@@ -117,12 +122,14 @@ test.describe("Pix ativo: modal", () => {
   test("copiar só a chave pelo modal usa a chave normalizada", async ({ page }) => {
     await openActiveSite(page);
     await openGift(page, SECOND);
+    await seedClipboard(page);
     await page.getByTestId("pix-copiar-chave-modal").click();
     await expect.poll(() => readClipboard(page), { message: "área de transferência" }).toBe(TEST_KEY);
   });
 
   test("copiar a chave pela seção Pix usa a chave normalizada", async ({ page }) => {
     await openActiveSite(page);
+    await seedClipboard(page);
     await page.getByTestId("pix-copiar-chave").click();
     await expect.poll(() => readClipboard(page), { message: "área de transferência" }).toBe(TEST_KEY);
   });
@@ -231,6 +238,7 @@ test.describe("Pix ativo: tipos de chave", () => {
     test(`chave ${tipo}`, async ({ page }) => {
       await openActiveSite(page, { chave: raw });
       await expect(page.getByTestId("pix-chave")).toHaveText(normalized);
+      await seedClipboard(page);
       await page.getByTestId("pix-copiar-chave").click();
       await expect.poll(() => readClipboard(page), { message: "área de transferência" }).toBe(normalized);
 

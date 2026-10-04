@@ -87,8 +87,8 @@ function describeScriptError(error, relPath) {
   const line = new RegExp(escaped + ":(\\d+)").exec(stack);
   const where = line ? " (linha " + line[1] + ")" : "";
   const kind = error && error.name === "SyntaxError" ? "erro de sintaxe" : "erro ao executar o arquivo";
-  return kind + where + ": " + (error && error.message ? error.message : String(error)) +
-    ". Confira aspas, vírgulas e chaves perto dessa linha.";
+  const hint = line ? "Confira aspas, vírgulas e chaves perto dessa linha." : "Confira aspas, vírgulas e chaves.";
+  return kind + where + ": " + (error && error.message ? error.message : String(error)) + ". " + hint;
 }
 
 function lineOf(text, index) {
@@ -103,11 +103,10 @@ function blankHtmlComments(html) {
 }
 
 function isRealIsoDate(text) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
-  if (!match) return false;
-  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
-  const date = new Date(Date.UTC(year, month - 1, day));
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(text)) return false;
+  const date = new Date(text + "T00:00:00Z");
+  // "2026-02-30" vira 2 de março (ou data inválida): só vale se der a mesma data de volta.
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === text;
 }
 
 // ---------------------------------------------------------------------
@@ -290,9 +289,8 @@ function checkGifts(rootDir, siteDir, addError, addWarning) {
   const seenIds = new Map();
   gifts.forEach((gift, index) => {
     const number = index + 1;
-    const label = isPlainObject(gift) && typeof gift.id === "string" && gift.id !== ""
-      ? "presente \"" + gift.id + "\""
-      : "presente nº " + number;
+    const hasId = isPlainObject(gift) && typeof gift.id === "string" && gift.id.trim() !== "";
+    const label = "presente nº " + number + (hasId ? " (" + JSON.stringify(gift.id) + ")" : "");
     const error = (field, message) => addError(GIFTS_FILE, label + (field ? " › " + field : ""), message);
     const warning = (field, message) => addWarning(GIFTS_FILE, label + (field ? " › " + field : ""), message);
 
