@@ -199,7 +199,7 @@ CLAUDE.md                    instruções para futuras sessões do Claude
 ## Créditos
 
 - **Convite e identidade visual:** Marina (protótipo original do site).
-- **Fontes:** Cormorant Garamond, Great Vibes e Montserrat, sob a licença [SIL Open Font License 1.1](https://openfontlicense.org), empacotadas pelo [Fontsource](https://fontsource.org) (texto da licença em `site/assets/fonts/LICENCAS-OFL.txt`).
+- **Fontes:** Cormorant Garamond, Ephesis e Montserrat, sob a licença [SIL Open Font License 1.1](https://openfontlicense.org), empacotadas pelo [Fontsource](https://fontsource.org) (texto da licença em `site/assets/fonts/LICENCAS-OFL.txt`).
 - **QR Code:** [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), de Kazuhiko Arase, licença MIT (`site/assets/vendor/qrcode.js`).
 - **Testes (só desenvolvimento):** Playwright, jsQR, pngjs e pix-utils.
 

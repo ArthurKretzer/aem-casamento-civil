@@ -25,7 +25,7 @@ nomes de funções e variáveis em inglês.
   Chave vazia ou inválida mantém `html[data-pix="em-breve"]`.
 - Fotos dos presentes: JPEG 960x720, até 150 KB, em `site/assets/img/presentes/`.
 - Manter a identidade visual do convite: paleta dourado, marrom e creme; fontes Cormorant Garamond,
-  Great Vibes e Montserrat.
+  Ephesis e Montserrat.
 - Textos do site em pt-BR, tom caloroso e direto; não inventar dados dos noivos.
 - Mudou o DOM, um `data-testid` ou o `config.js`? Atualize testes e README no mesmo commit.
 - Antes de publicar, `npm test` e `npx playwright test` precisam passar. Publicar = push na `main`

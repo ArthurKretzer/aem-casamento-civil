@@ -93,8 +93,8 @@ DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 
-==================== @fontsource/great-vibes ====================
-Copyright 2010 The Great Vibes Pro Project Authors (https://github.com/googlefonts/great-vibes)
+==================== @fontsource/ephesis ====================
+Copyright 2004-2021 The Ephesis Project Authors (https://github.com/googlefonts/ephesis)
 
 This Font Software is licensed under the SIL Open Font License, Version 1.1.
 This license is copied below, and is also available with a FAQ at:
