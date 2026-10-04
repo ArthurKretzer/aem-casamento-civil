@@ -541,76 +541,7 @@ html:has(.pix-dialog[open]) { overflow: hidden; }
   font-size: 17px;
 }
 
-/* ---------- Pix ---------- */
-.section--pix {
-  background: var(--paper-3);
-}
-
-.pix-card {
-  width: min(800px, 100%);
-  margin: auto;
-  text-align: center;
-  padding: clamp(40px, 7vw, 80px) clamp(22px, 7vw, 80px);
-  background: rgba(255,255,255,.72);
-  border: 1px solid rgba(156,113,63,.25);
-  box-shadow: var(--shadow);
-  position: relative;
-}
-
-.pix-card__ornament { color: var(--gold); font-size: 22px; margin-bottom: 20px; }
-
-.pix-soon {
-  display: none;
-  margin: 36px auto 0;
-  max-width: 460px;
-  padding: 18px 20px;
-  border: 1px dashed var(--line);
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 21px;
-  color: var(--ink);
-}
-
-.pix-active { display: none; }
-
-/* "carregando" (antes do app.js rodar) não mostra nenhum dos dois estados */
-html[data-pix="ativo"] .pix-active { display: block; }
-html[data-pix="em-breve"] .pix-soon { display: block; }
-
-.pix-key {
-  width: min(520px, 100%);
-  margin: 40px auto 0;
-  padding: 10px 10px 10px 16px;
-  background: white;
-  border: 1px solid var(--line-strong);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pix-key span {
-  flex: 1;
-  min-width: 0;
-  overflow-wrap: anywhere;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 14px;
-  text-align: left;
-}
-
-.pix-key button {
-  flex: none;
-  min-height: 44px;
-  padding: 0 10px;
-  border: 0;
-  background: transparent;
-  color: var(--gold-text);
-  text-transform: uppercase;
-  letter-spacing: .15em;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-}
-
+/* ---------- Recebedor (no modal) ---------- */
 .pix-receiver {
   margin: 22px auto 0;
   max-width: 480px;
@@ -621,14 +552,6 @@ html[data-pix="em-breve"] .pix-soon { display: block; }
 }
 
 .pix-receiver strong { color: var(--ink); font-weight: 600; }
-
-.pix-note {
-  margin: 14px auto 0;
-  font-size: 14px;
-  line-height: 1.55;
-  color: var(--ink-soft);
-  max-width: 450px;
-}
 
 /* ---------- Confirmação de presença ---------- */
 .section--rsvp { text-align: center; }
@@ -733,16 +656,17 @@ footer small {
 .dialog-head h2 {
   margin: 0;
   font-family: var(--serif);
-  font-size: 54px;
+  font-size: 42px;
   font-weight: 500;
-  line-height: 1;
+  line-height: 1.05;
 }
 
-.dialog-gift {
-  margin: 10px 0 0;
+.dialog-amount {
+  margin: 12px 0 0;
   font-family: var(--serif);
-  font-style: italic;
-  font-size: 21px;
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--gold-text);
 }
 
 .dialog-close {
@@ -943,19 +867,9 @@ footer small {
   .detail + .detail { border-left: 0; border-top: 1px solid var(--line); }
   .custom-gift { display: block; padding: 24px 20px; }
   .custom-gift__form { margin-top: 18px; }
-  .pix-key { padding-left: 12px; }
   .botanical { opacity: .38; transform: scale(.7); }
   .dialog-inner { padding: 44px 20px 24px; }
-  .dialog-head h2 { font-size: 46px; }
-}
-
-/* Cartão Pix em celulares estreitos */
-@media (max-width: 400px) {
-  .pix-card { padding-inline: 16px; }
-  .pix-card h2 { font-size: clamp(34px, 12.5vw, 46px); }
-  .pix-key { flex-wrap: wrap; }
-  .pix-key span { flex-basis: 100%; }
-  .pix-key button { margin-left: auto; }
+  .dialog-head h2 { font-size: 36px; }
 }
 
 /* Cards compactos, duas colunas, em telas estreitas */

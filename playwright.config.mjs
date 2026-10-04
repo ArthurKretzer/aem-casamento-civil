@@ -2,7 +2,6 @@
 //
 //   npx playwright test                  sobe o site local e testa
 //   BASE_URL=https://... npx playwright test   testa o site já publicado
-//   SCREENSHOTS=1 npx playwright test screenshots   gera capturas de tela
 //
 // Nos testes, use sempre page.goto("./"): o caminho relativo preserva o
 // subcaminho /presentes-casamento/ do GitHub Pages.
@@ -27,9 +26,7 @@ const chromiumArgs = (process.env.PW_CHROMIUM_ARGS || "").split(/\s+/).filter(Bo
 export default defineConfig({
   testDir: "tests/e2e",
   testMatch: "**/*.spec.mjs",
-  // As capturas de tela ficam em test-results/screenshots; o Playwright
-  // limpa só esta pasta a cada execução, então elas sobrevivem.
-  outputDir: "test-results/artefatos",
+  outputDir: "test-results",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
@@ -43,7 +40,7 @@ export default defineConfig({
     timezoneId: "America/Sao_Paulo",
     // Os testes de "copiar" leem a área de transferência de verdade.
     permissions: ["clipboard-read", "clipboard-write"],
-    // Sem animações: capturas, QR Code e contraste ficam estáveis.
+    // Sem animações: a leitura do QR Code fica estável.
     reducedMotion: "reduce",
     trace: "retain-on-failure",
     launchOptions: { args: chromiumArgs },

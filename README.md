@@ -43,7 +43,7 @@ Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida,
 
 ### O modo "Pix em breve"
 
-Enquanto `pix.chave` estiver vazia, o site funciona normalmente, mas os botões de presente ficam desabilitados ("Pix em breve"), o valor livre fica travado e **nenhum QR Code ou chave aparece**. É assim que o site vai ao ar primeiro, antes de a chave existir.
+Enquanto `pix.chave` estiver vazia, o site funciona normalmente, mas os botões de presente ficam desabilitados ("disponível em breve"), o valor livre fica travado e **nenhum QR Code ou chave aparece**. É assim que o site vai ao ar primeiro, antes de a chave existir.
 
 Para ligar o Pix, preencha `chave` **e** `recebedor`. O site só ativa o Pix quando a chave é válida, o recebedor está preenchido e um código de teste passa na validação; se a chave estiver preenchida mas errada, ele continua em "Pix em breve" e o teste do GitHub acusa o erro (então nada errado vai ao ar).
 
@@ -95,7 +95,7 @@ O dinheiro dos presentes cai direto na conta de vocês, então vale cuidar bem d
 - [ ] Com o site aberto **no celular**, outro **Pix real de R$ 1 pelo Pix Copia e Cola**: toque em "copiar código Pix" e cole no app do banco.
 - [ ] Os dois testes (QR Code e Copia e Cola) em **2 bancos diferentes**, por exemplo um banco tradicional e uma conta digital.
 - [ ] Em cada teste: o nome do recebedor na tela do banco é o esperado, o valor é o certo e o dinheiro apareceu no extrato.
-- [ ] A chave exibida na seção "Sem intermediários" é a de vocês.
+- [ ] Ao abrir um presente, o recebedor mostrado no modal ("O recebedor deve aparecer como...") é o de vocês.
 - [ ] `whatsapp` preenchido no `config.js` e o botão **confirmar presença** abre a conversa certa (lembrem que o número fica público no site e no repositório).
 - [ ] `rsvpPrazo` com a data certa (hoje: 15 de outubro). Depois do prazo o site continua mostrando a data; se quiserem, esvaziem `whatsapp` para esconder o botão.
 
@@ -120,9 +120,10 @@ O site é publicado no **GitHub Pages**, pelo **GitHub Actions**. Cada alteraç�
 
 Aba **Actions** do repositório, fluxo **Site**, execução mais recente:
 
-- ícone verde: testado, publicado e conferido no ar;
-- ícone vermelho em **Testes** ou em **Publicar no GitHub Pages**: nada novo foi ao ar; o site continua como estava. Abra o job que falhou, leia a mensagem, corrija e faça outro commit.
-- ícone vermelho só em **Verificar o site no ar**: a versão nova **já está no ar**, mas algo não passou na conferência final. Abra o site, confira a seção Pix e os presentes e, se algo estiver errado, corrija o arquivo e faça outro commit (ou volte à versão anterior, como explicado abaixo).
+- ícone verde: testado e publicado (leva 1 a 2 minutos para aparecer no site);
+- ícone vermelho: nada novo foi ao ar; o site continua como estava. Abra o job que falhou, leia a mensagem, corrija e faça outro commit.
+
+Para conferir qual versão está no ar, abra `https://arthurkretzer.github.io/presentes-casamento/version.txt`: ele mostra o código do último commit publicado.
 
 O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma alteração que já foi ao ar: abra o arquivo no GitHub, clique em **History**, abra a versão anterior (botão **View file** / `<>`), copie o conteúdo, cole no arquivo atual (lápis **Edit this file**) e faça o commit. Isso publica de novo a versão antiga.
 
@@ -132,7 +133,6 @@ O GitHub também avisa por e-mail quando uma execução falha. Para desfazer uma
 | --- | --- | --- |
 | `testes` | Em **todas** as branches | Instala as dependências, valida `config.js` e `presentes.js` (`npm run validar`), roda os testes unitários do Pix (`npm run test:unit`) e os testes no navegador (`npx playwright test`, em versão desktop e celular). |
 | `publicar` | Só na `main`, depois de `testes` passar | Grava a versão (o código do commit) em `site/version.txt` e publica a pasta `site/` no GitHub Pages. |
-| `verificar` | Depois de `publicar` | Espera (até 10 minutos) a versão nova aparecer em `.../version.txt` e então repete os testes do navegador **contra o site de verdade**. |
 
 Se um dia o endereço mudar (por exemplo, um domínio próprio), atualizem a URL em todos estes lugares: `siteUrl` no `config.js`; `og:url`, `og:image` e o link do Google Agenda (parâmetro `details=`) no `site/index.html`; e `UID`, `DESCRIPTION` e `URL` no `site/casamento.ics`.
 
@@ -162,14 +162,11 @@ npx playwright test --ui                      # modo visual, bom para depurar
 
 # testar o site já publicado (em vez do servidor local)
 BASE_URL=https://arthurkretzer.github.io/presentes-casamento/ npx playwright test
-
-# gerar capturas de tela (vão para test-results/screenshots/)
-SCREENSHOTS=1 npx playwright test screenshots
 ```
 
 No Windows (PowerShell), defina a variável antes: `$env:BASE_URL="https://..."; npx playwright test`.
 
-Os testes de navegador usam uma chave Pix de teste injetada na hora (a do exemplo do Banco Central), então rodam igual com a chave real vazia ou preenchida. Quando a chave real está preenchida, `tests/e2e/config-real.spec.mjs` confere o Pix de cada presente com ela.
+Os testes de navegador (`tests/e2e/site.spec.mjs`) são poucos e rápidos, de propósito: conferem que o site carrega sem erros, os cards, o modo "em breve", o modal (Copia e Cola e QR Code com o mesmo código), o valor livre, o layout em 360px e que a chave só vem do `config.js`. Eles usam uma chave Pix de teste injetada na hora (a do exemplo do Banco Central), então rodam igual com a chave real vazia ou preenchida; quando a chave real está preenchida, um teste também confere o Pix de cada presente com ela.
 
 ### Estrutura de pastas
 
@@ -192,7 +189,7 @@ scripts/
   gerar-assets.mjs           gera a prévia do link e os ícones
 tests/
   unit/                      testes do Pix e da validação (node --test)
-  e2e/                       testes no navegador (Playwright)
+  e2e/site.spec.mjs          testes de fumaça no navegador (Playwright)
 .github/workflows/pages.yml  testa e publica
 playwright.config.mjs        configuração dos testes de navegador
 CLAUDE.md                    instruções para futuras sessões do Claude
@@ -205,7 +202,7 @@ CLAUDE.md                    instruções para futuras sessões do Claude
 - **Convite e identidade visual:** Marina (protótipo original do site).
 - **Fontes:** Cormorant Garamond, Great Vibes e Montserrat, sob a licença [SIL Open Font License 1.1](https://openfontlicense.org), empacotadas pelo [Fontsource](https://fontsource.org) (texto da licença em `site/assets/fonts/LICENCAS-OFL.txt`).
 - **QR Code:** [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator), de Kazuhiko Arase, licença MIT (`site/assets/vendor/qrcode.js`).
-- **Testes (só desenvolvimento):** Playwright, axe-core, jsQR, pngjs e pix-utils.
+- **Testes (só desenvolvimento):** Playwright, jsQR, pngjs e pix-utils.
 
 ### Fotos
 

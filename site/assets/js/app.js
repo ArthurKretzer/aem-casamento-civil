@@ -137,7 +137,7 @@
       button.textContent = "já presenteado";
     } else if (!pix) {
       button.disabled = true;
-      button.textContent = "Pix em breve";
+      button.textContent = "disponível em breve";
     } else {
       button.textContent = "presentear →";
       button.setAttribute("aria-label", `Presentear: ${gift.nome} (${formatMoney(cents, true)})`);
@@ -173,7 +173,7 @@
     if (!pix) {
       customInput.disabled = true;
       customButton.disabled = true;
-      customButton.textContent = "Pix em breve";
+      customButton.textContent = "em breve";
       return;
     }
     customInput.addEventListener("input", clearCustomError);
@@ -198,19 +198,9 @@
     customInput.removeAttribute("aria-invalid");
   }
 
-  // ---------- Seção Pix ----------
-  function setupPixSection() {
-    if (!pix) return;
-    byTestId("pix-chave").textContent = pix.key;
-    byTestId("pix-recebedor").textContent = pix.receiver;
-    byTestId("pix-recebedor-modal").textContent = pix.receiver;
-
-    const copyKeyButton = byTestId("pix-copiar-chave");
-    copyKeyButton.addEventListener("click", async () => {
-      const copied = await copyText(pix.key);
-      copyKeyButton.textContent = copied ? "copiado!" : "copie a chave ao lado";
-      setTimeout(() => { copyKeyButton.textContent = "copiar chave"; }, 2200);
-    });
+  // ---------- Recebedor (conferido pelo convidado no app do banco) ----------
+  function setupReceiver() {
+    if (pix) byTestId("pix-recebedor-modal").textContent = pix.receiver;
   }
 
   // ---------- Área de transferência ----------
@@ -408,7 +398,7 @@
 
   renderGifts();
   setupCustomGift();
-  setupPixSection();
+  setupReceiver();
   setupDialog();
   setupRsvp();
 })();

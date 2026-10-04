@@ -99,7 +99,7 @@
         <h2>Um presente para<br>nossa nova etapa.</h2>
         <p class="section-copy">
           Mais do que qualquer presente, ficaremos felizes em ter você conosco.
-          Se quiser contribuir, escolha uma opção abaixo — o valor será enviado diretamente para nós via Pix.
+          Se quiser nos presentear, escolha um presente abaixo.
         </p>
       </div>
 
@@ -123,29 +123,6 @@
       </div>
     </section>
 
-    <section class="section section--pix" id="pix">
-      <div class="pix-card">
-        <div class="pix-card__ornament" aria-hidden="true">✦</div>
-        <p class="section-kicker">direto para nós</p>
-        <h2>Sem intermediários.</h2>
-        <p class="section-copy">
-          O pagamento é feito diretamente para a nossa chave Pix.
-          Assim, não há plataforma intermediando ou descontando uma porcentagem do presente.
-        </p>
-
-        <p class="pix-soon" data-testid="pix-em-breve">A chave Pix estará disponível aqui em breve.</p>
-
-        <div class="pix-active">
-          <div class="pix-key">
-            <span id="pixKeyDisplay" data-testid="pix-chave"></span>
-            <button id="copyPix" data-testid="pix-copiar-chave" type="button">copiar chave</button>
-          </div>
-          <p class="pix-receiver">Ao pagar, confira se o recebedor é <strong data-testid="pix-recebedor"></strong>.</p>
-          <p class="pix-note">Ao escolher um presente, o código Pix e o QR Code já aparecem com o valor preenchido.</p>
-        </div>
-      </div>
-    </section>
-
     <section class="section section--rsvp">
       <p class="section-kicker" data-testid="rsvp-prazo">até 15 de outubro</p>
       <h2>Confirme sua presença.</h2>
@@ -166,8 +143,8 @@
     <div class="dialog-inner">
       <div class="dialog-head">
         <p class="section-kicker" id="dialogKicker">seu presente</p>
-        <h2 id="dialogTitle" data-testid="pix-valor"></h2>
-        <p class="dialog-gift" id="dialogGiftName" data-testid="pix-presente"></p>
+        <h2 id="dialogTitle" data-testid="pix-presente"></h2>
+        <p class="dialog-amount" id="dialogAmount" data-testid="pix-valor"></p>
       </div>
 
       <div class="dialog-copy">
