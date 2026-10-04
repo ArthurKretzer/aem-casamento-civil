@@ -1,6 +1,6 @@
 // =====================================================================
 // Testes do módulo site/assets/js/pix.js (Pix "Copia e Cola").
-// Rodar: node --test tests/unit/
+// Rodar: npm run test:unit   (ou: node --test tests/unit/*.test.mjs)
 //
 // O mesmo arquivo que vai para o navegador é carregado aqui via CommonJS.
 // Como "oráculos" independentes usamos o vetor oficial do Banco Central, a
@@ -1471,10 +1471,13 @@ describe("QR Code (ida e volta com qrcode-generator e jsQR)", () => {
     assert.equal(decode(payload, { scale: 10 }), payload);
   });
 
-  it("o QR de um payload típico é pequeno o bastante para ficar nítido num celular", () => {
-    const { modules } = render(payloads["Arthur & Marina, R$ 150,00"]);
-    // 280 px / (módulos + 8 de margem) -> pelo menos 4 px por módulo.
-    assert.ok(modules <= 61, `${modules} módulos`);
+  it("o QR é pequeno o bastante para ficar nítido num celular (>= 4 px por módulo em 280 px)", () => {
+    const typical = render(payloads["Arthur & Marina, R$ 150,00"]).modules; // hoje: 49 (versão 8)
+    const largest = render(payloads["o maior payload possível (e-mail de 77, nome 25, cidade 15, txid 25)"]).modules; // hoje: 61 (versão 11)
+    assert.ok(typical <= 53, `${typical} módulos`);
+    assert.ok(largest <= 61, `${largest} módulos`);
+    // 280 px divididos por (módulos + 4 de margem de cada lado)
+    assert.ok(280 / (largest + 8) >= 4, `${280 / (largest + 8)} px por módulo`);
   });
 
   it("o QR de textos diferentes é diferente", () => {

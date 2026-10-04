@@ -1,7 +1,7 @@
 // =====================================================================
 // Testes dos dados que os noivos editam (site/config.js e
 // site/presentes.js) e do validador scripts/validar-dados.mjs.
-// Rodar: node --test tests/unit/
+// Rodar: npm run test:unit   (ou: node --test tests/unit/*.test.mjs)
 //
 // 1. Os arquivos REAIS do repositório são carregados como o navegador faz
 //    (script clássico, `window.X = ...`) e conferidos.
