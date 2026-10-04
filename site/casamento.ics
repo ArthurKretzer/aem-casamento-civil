@@ -1,0 +1,25 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Arthur e Marina//Casamento//PT-BR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:casamento-arthur-marina-20261116@arthurkretzer.github.io
+DTSTAMP:20261004T120000Z
+DTSTART:20261116T220000Z
+DTEND:20261117T020000Z
+SUMMARY:Casamento Arthur & Marina
+LOCATION:Edifício Vila Salomy\, Rua Santos Saraiva\, 494 - Estreito\, Flor
+ ianópolis - SC
+DESCRIPTION:Casamento civil de Arthur & Marina\, em um jantar.\nhttps://art
+ hurkretzer.github.io/presentes-casamento/
+URL:https://arthurkretzer.github.io/presentes-casamento/
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+BEGIN:VALARM
+ACTION:DISPLAY
+TRIGGER:-P1D
+DESCRIPTION:Amanhã: casamento de Arthur & Marina\, às 19h
+END:VALARM
+END:VEVENT
+END:VCALENDAR

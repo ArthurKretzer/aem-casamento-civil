@@ -1,0 +1,28 @@
+{
+  "name": "presentes-casamento",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site do casamento de Arthur & Marina (16/11/2026) — estático, publicado no GitHub Pages.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "servir": "node scripts/servir.mjs",
+    "validar": "node scripts/validar-dados.mjs",
+    "test:unit": "node --test tests/unit/",
+    "test:e2e": "playwright test",
+    "test": "npm run validar && npm run test:unit"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.2",
+    "@fontsource/cormorant-garamond": "5.3.0",
+    "@fontsource/great-vibes": "5.3.0",
+    "@fontsource/montserrat": "5.3.0",
+    "@playwright/test": "1.56.1",
+    "jsqr": "1.4.0",
+    "pix-utils": "2.8.2",
+    "pngjs": "^7.0.0",
+    "qrcode-generator": "2.0.4"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
