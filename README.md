@@ -206,4 +206,4 @@ CLAUDE.md                    instruções para futuras sessões do Claude
 ### Fotos
 
 <!-- CREDITOS-FOTOS -->
-Os presentes ainda estão sem foto (o card mostra o enfeite ✦). Ao adicionar fotos, registre aqui a origem e a licença de cada uma.
+Imagens geradas por IA (Gemini) a pedido dos noivos, recortadas em 960×720 e comprimidas para o site. Presentes sem foto mostram o enfeite ✦. Ao adicionar fotos de outra origem, registre aqui a fonte e a licença.
