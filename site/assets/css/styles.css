@@ -456,6 +456,14 @@ main { overflow: hidden; }
 
 .gift[data-esgotado="true"] .gift__img { filter: grayscale(.6) sepia(.15) opacity(.75); }
 
+.noscript-note {
+  width: min(1000px, 100%);
+  margin: 30px auto 0;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 20px;
+}
+
 .custom-gift {
   width: min(1000px, 100%);
   margin: 20px auto 0;
