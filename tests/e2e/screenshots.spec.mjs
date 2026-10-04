@@ -13,6 +13,7 @@ import {
   openActiveSite,
   openComingSoonSite,
   openGift,
+  requireGift,
   settlePage,
 } from "./helpers.mjs";
 
@@ -53,8 +54,9 @@ test.describe("Capturas de tela", () => {
   });
 
   test("modal Pix aberto", async ({ page }, testInfo) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    await openGift(page, 1);
+    await openGift(page, target.index);
     await page.getByTestId("pix-qr").evaluate((image) => image.decode());
     await capture(page, testInfo, "modal");
   });

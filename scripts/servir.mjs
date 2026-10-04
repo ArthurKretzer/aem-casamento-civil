@@ -101,8 +101,9 @@ async function sendNotFound(res, method) {
 
 // ---------- Busca do arquivo ----------
 // Procura cada trecho do caminho listando a pasta, para que maiúsculas e
-// minúsculas contem (como no GitHub Pages, que roda em Linux). Assim
-// "Foto.JPG" não funciona aqui e quebra só depois de publicar.
+// minúsculas contem (como no GitHub Pages, que roda em Linux). Assim um nome
+// como "Foto.JPG" no lugar de "foto.jpg" falha aqui, em vez de só quebrar
+// depois de publicado (no Mac e no Windows o disco ignoraria a diferença).
 async function findEntry(segments) {
   let current = ROOT_DIR;
   for (const segment of segments) {

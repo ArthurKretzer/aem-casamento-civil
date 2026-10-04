@@ -5,13 +5,12 @@
 
 import { expect, test } from "@playwright/test";
 import {
-  PRESENTES,
+  AVAILABLE_GIFTS,
   PixBR,
   SITE_CONFIG,
   expectDialogContent,
   expectQrToEncode,
   openGift,
-  toCents,
   watchPage,
 } from "./helpers.mjs";
 
@@ -50,16 +49,13 @@ test.describe("Configuração real do config.js", () => {
       await expect(page.getByTestId("pix-recebedor")).toContainText(expected.receiver);
     });
 
-    for (const [index, gift] of PRESENTES.entries()) {
-      test(`presente "${gift.nome}": Copia e Cola e QR Code corretos`, async ({ page }) => {
+    // Presentes esgotados não abrem o modal e ficam de fora.
+    for (const target of AVAILABLE_GIFTS) {
+      test(`presente "${target.name}": Copia e Cola e QR Code corretos`, async ({ page }) => {
         await page.goto("./");
-        await expect(page.getByTestId("presente-card").nth(index)).toBeVisible();
-        await openGift(page, index);
-        const payload = await expectDialogContent(page, {
-          cents: toCents(gift.valor),
-          name: gift.nome,
-          key: expected.key,
-        });
+        await expect(page.getByTestId("presente-card").nth(target.index)).toBeVisible();
+        await openGift(page, target.index);
+        const payload = await expectDialogContent(page, { ...target, key: expected.key });
         await expectQrToEncode(page, payload);
         await expect(page.getByTestId("pix-recebedor-modal")).toContainText(expected.receiver);
       });

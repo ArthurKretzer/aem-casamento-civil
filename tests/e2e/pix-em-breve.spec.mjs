@@ -28,9 +28,11 @@ test.describe("Pix em breve (chave vazia)", () => {
     await openComingSoonSite(page);
     const buttons = page.getByTestId("presente-card-botao");
     await expect(buttons).toHaveCount(PRESENTES.length);
-    for (const button of await buttons.all()) {
-      await expect(button).toBeDisabled();
-      await expect(button).toHaveText(/em breve/i);
+    for (const [index, gift] of PRESENTES.entries()) {
+      const button = buttons.nth(index);
+      await expect(button, `botão de "${gift.nome}"`).toBeDisabled();
+      // Presente esgotado mostra "já presenteado", que vale mais que "em breve".
+      if (!gift.esgotado) await expect(button).toHaveText(/em breve/i);
     }
   });
 

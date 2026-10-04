@@ -17,7 +17,9 @@ Quase tudo o que muda fica em dois arquivos dentro da pasta `site/`:
 - `site/config.js`: Pix, WhatsApp e prazo de confirmação;
 - `site/presentes.js`: a lista de presentes.
 
-Dá para editar os dois direto no GitHub, pelo navegador, sem instalar nada:
+Os textos fixos (data, local, frases) ficam em `site/index.html` e o visual em `site/assets/css/styles.css`.
+
+Dá para editar os arquivos direto no GitHub, pelo navegador, sem instalar nada:
 
 1. Abra o repositório no GitHub, entre em `site/` e clique no arquivo (`config.js` ou `presentes.js`).
 2. Clique no lápis (**Edit this file**), no canto direito acima do texto.
@@ -89,9 +91,9 @@ O dinheiro dos presentes cai direto na conta de vocês, então vale cuidar bem d
 ### Checklist antes de divulgar o link
 
 - [ ] Chave aleatória criada; `pix.chave` e `pix.recebedor` preenchidos no `config.js`; commit feito e a aba **Actions** com o ícone verde.
-- [ ] Pelo **celular**, no site publicado, um **Pix real de R$ 1 pelo QR Code** (use "outro valor" e digite `1`).
-- [ ] Outro **Pix real de R$ 1 pelo Pix Copia e Cola**.
-- [ ] Os dois testes em **2 bancos diferentes** (por exemplo, um banco tradicional e uma conta digital).
+- [ ] Com o site publicado aberto **no computador**, um **Pix real de R$ 1 lendo o QR Code** com o app do banco no celular (use "outro valor" e digite `1`).
+- [ ] Com o site aberto **no celular**, outro **Pix real de R$ 1 pelo Pix Copia e Cola**: toque em "copiar código Pix" e cole no app do banco.
+- [ ] Os dois testes (QR Code e Copia e Cola) em **2 bancos diferentes**, por exemplo um banco tradicional e uma conta digital.
 - [ ] Em cada teste: o nome do recebedor na tela do banco é o esperado, o valor é o certo e o dinheiro apareceu no extrato.
 - [ ] A chave exibida na seção "Sem intermediários" é a de vocês.
 
@@ -110,7 +112,7 @@ O site é publicado no **GitHub Pages**, pelo **GitHub Actions**. Cada alteraç�
 
 1. O repositório precisa ser **público** (é o que o GitHub Pages gratuito exige).
 2. Vá em **Settings → Pages → Build and deployment → Source** e escolha **GitHub Actions**.
-3. Envie um commit para a `main` (ou vá em **Actions → Site → Run workflow**). O endereço aparece no fim da execução.
+3. Envie um commit para a `main` (ou vá em **Actions → Site → Run workflow**). O endereço aparece no fim da execução. Se a primeira execução falhar no passo "Configurar o Pages", é porque o passo 2 ainda não foi feito: faça e use **Re-run jobs**.
 
 ### Como acompanhar
 
@@ -146,7 +148,7 @@ npm test                          # valida config/presentes + testes unitários
 npx playwright test               # testes no navegador (sobe o servidor sozinho)
 ```
 
-O servidor local serve a pasta `site/` sob `/presentes-casamento/`, igual ao GitHub Pages, por isso **todos os caminhos do site são relativos** (sem `/` no começo).
+O servidor local serve a pasta `site/` sob `/presentes-casamento/`, igual ao GitHub Pages, por isso **todos os caminhos do site são relativos** (sem `/` no começo). Para usar outra porta: `npm run servir -- --port 4180`.
 
 Outras formas de rodar os testes no navegador:
 
@@ -205,3 +207,11 @@ CLAUDE.md                    instruções para futuras sessões do Claude
 ### Fotos
 
 <!-- CREDITOS-FOTOS -->
+Fotos do [Unsplash](https://unsplash.com), sob a [Unsplash License](https://unsplash.com/license) (uso livre, crédito opcional), recortadas em 960×720 e comprimidas para o site.
+
+| Presente | Arquivo | Foto original |
+| --- | --- | --- |
+| Um pequeno gesto | `site/assets/img/presentes/pequeno-gesto.jpg` | [Unsplash `photo-1563241527-3004b7be0ffd`](https://images.unsplash.com/photo-1563241527-3004b7be0ffd) |
+| Um jantar especial | `site/assets/img/presentes/jantar-especial.jpg` | [Unsplash `photo-1511795409834-ef04bbd61622`](https://images.unsplash.com/photo-1511795409834-ef04bbd61622) |
+| Uma experiência a dois | `site/assets/img/presentes/experiencia-a-dois.jpg` | [Unsplash `photo-1707296819777-f96b799efb41`](https://images.unsplash.com/photo-1707296819777-f96b799efb41) |
+| Nossa nova casa | `site/assets/img/presentes/nova-casa.jpg` | [Unsplash `photo-1631679706909-1844bbd07221`](https://images.unsplash.com/photo-1631679706909-1844bbd07221) |

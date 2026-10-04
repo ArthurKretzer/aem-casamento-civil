@@ -11,7 +11,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import AxeBuilder from "@axe-core/playwright";
-import { expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import jsQR from "jsqr";
 import pngjs from "pngjs";
 import { hasError, parsePix } from "pix-utils";
@@ -182,9 +182,26 @@ export async function settlePage(page) {
 // ---------- Pix: valores esperados ----------
 export const toCents = (valor) => Math.round(valor * 100);
 
+// Presentes que o convidado consegue escolher (os esgotados ficam de fora),
+// com a posição de cada um na página. Os testes do modal usam estes, para não
+// quebrarem se os noivos marcarem um presente como "já presenteado".
+export const AVAILABLE_GIFTS = PRESENTES.map((gift, index) => ({
+  index,
+  gift,
+  name: gift.nome,
+  cents: toCents(gift.valor),
+})).filter(({ gift }) => !gift.esgotado);
+
+// n-ésimo presente disponível (0 = o primeiro); se houver menos, o último.
+export function requireGift(position) {
+  const pick = AVAILABLE_GIFTS[Math.min(position, AVAILABLE_GIFTS.length - 1)];
+  test.skip(!pick, "Todos os presentes estão esgotados: não há o que escolher no modal.");
+  return pick;
+}
+
 // Intl usa espaço sem quebra entre "R$" e o número; normalizamos para comparar.
 export const brl = (cents, compact = false) =>
-  PixBR.formatBRL(cents, { compact }).replace(/ /g, " ");
+  PixBR.formatBRL(cents, { compact }).replace(/\u00a0/g, " ");
 
 export function expectedPayload(cents, key = TEST_KEY) {
   return PixBR.buildPixPayload({

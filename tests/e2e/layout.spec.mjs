@@ -1,7 +1,7 @@
 // Layout em telas estreitas: nada pode vazar para o lado.
 
 import { expect, test } from "@playwright/test";
-import { COMING_SOON, openActiveSite, openGift, openSite, settlePage } from "./helpers.mjs";
+import { COMING_SOON, openActiveSite, openGift, openSite, requireGift, settlePage } from "./helpers.mjs";
 
 const NARROW = { width: 360, height: 740 };
 
@@ -36,9 +36,10 @@ test.describe("Layout", () => {
   });
 
   test("360px: o modal Pix cabe na tela e o QR Code tem pelo menos 280px", async ({ page }) => {
+    const target = requireGift(1);
     await page.setViewportSize(NARROW);
     await openActiveSite(page);
-    const dialog = await openGift(page, 1);
+    const dialog = await openGift(page, target.index);
 
     const qr = dialog.getByTestId("pix-qr");
     await expect(qr).toHaveAttribute("data-ready", "true");

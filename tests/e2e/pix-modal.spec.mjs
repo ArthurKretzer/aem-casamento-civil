@@ -1,6 +1,10 @@
 // Modo ativo: chave de teste injetada. Cobre o fluxo que o convidado faz de
 // verdade: escolher o presente, copiar o código Pix, ler o QR Code, baixar a
 // imagem e fechar o modal.
+//
+// "O 2º presente" é o 2º que ainda está disponível em presentes.js (os
+// esgotados não abrem o modal), para o teste não quebrar se os noivos
+// marcarem algum como "já presenteado".
 
 import fs from "node:fs";
 import { expect, test } from "@playwright/test";
@@ -17,14 +21,12 @@ import {
   openActiveSite,
   openGift,
   readClipboard,
+  requireGift,
   seedClipboard,
-  toCents,
   watchPage,
 } from "./helpers.mjs";
 
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-const SECOND = 1; // índice do 2º presente
-const second = { cents: toCents(PRESENTES[SECOND].valor), name: PRESENTES[SECOND].nome };
 
 test.describe("Pix ativo: página", () => {
   test("a seção Pix mostra a chave normalizada e o recebedor", async ({ page }) => {
@@ -39,8 +41,13 @@ test.describe("Pix ativo: página", () => {
     await openActiveSite(page);
     const buttons = page.getByTestId("presente-card-botao");
     await expect(buttons).toHaveCount(PRESENTES.length);
-    for (const button of await buttons.all()) {
-      await expect(button).toBeEnabled();
+    for (const [index, gift] of PRESENTES.entries()) {
+      const button = buttons.nth(index);
+      if (gift.esgotado) {
+        await expect(button).toBeDisabled();
+        continue;
+      }
+      await expect(button, `botão de "${gift.nome}"`).toBeEnabled();
       await expect(button).toHaveText(/presentear →/);
     }
     await expect(page.getByTestId("valor-livre-input")).toBeEnabled();
@@ -48,9 +55,10 @@ test.describe("Pix ativo: página", () => {
   });
 
   test("sem erros no console durante o fluxo completo", async ({ page, baseURL }) => {
+    const target = requireGift(1);
     const seen = watchPage(page, baseURL);
     await openActiveSite(page);
-    await openGift(page, SECOND);
+    await openGift(page, target.index);
     await page.keyboard.press("Escape");
     expect(seen.consoleErrors, "console.error").toEqual([]);
     expect(seen.pageErrors, "erros de JavaScript").toEqual([]);
@@ -59,18 +67,20 @@ test.describe("Pix ativo: página", () => {
 
 test.describe("Pix ativo: modal", () => {
   test("o 2º presente abre o modal com valor, nome e Copia e Cola corretos", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    await openGift(page, SECOND);
-    const payload = await expectDialogContent(page, second);
+    await openGift(page, target.index);
+    const payload = await expectDialogContent(page, target);
     // O campo é somente leitura: o convidado só pode copiar.
     await expect(page.getByTestId("pix-payload")).toHaveJSProperty("readOnly", true);
     expect(payload).toContain("br.gov.bcb.pix");
   });
 
   test("o QR Code tem pelo menos 280px e decodifica exatamente o Copia e Cola", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    await openGift(page, SECOND);
-    const payload = await expectDialogContent(page, second);
+    await openGift(page, target.index);
+    const payload = await expectDialogContent(page, target);
 
     const qr = page.getByTestId("pix-qr");
     await expect(qr).toHaveAttribute("data-ready", "true");
@@ -82,9 +92,10 @@ test.describe("Pix ativo: modal", () => {
   });
 
   test("copiar o código Pix coloca o Copia e Cola na área de transferência", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    await openGift(page, SECOND);
-    const payload = await expectDialogContent(page, second);
+    await openGift(page, target.index);
+    const payload = await expectDialogContent(page, target);
 
     await seedClipboard(page);
     await page.getByTestId("pix-copiar").click();
@@ -93,6 +104,7 @@ test.describe("Pix ativo: modal", () => {
   });
 
   test("se a cópia automática falhar, o código fica selecionado e aparece um aviso", async ({ page }) => {
+    const target = requireGift(1);
     // Simula navegadores que bloqueiam a área de transferência (ex.: dentro de apps).
     await page.addInitScript(() => {
       Object.defineProperty(navigator.clipboard, "writeText", {
@@ -102,8 +114,8 @@ test.describe("Pix ativo: modal", () => {
       document.execCommand = () => false;
     });
     await openActiveSite(page);
-    await openGift(page, SECOND);
-    const payload = await expectDialogContent(page, second);
+    await openGift(page, target.index);
+    const payload = await expectDialogContent(page, target);
 
     await seedClipboard(page);
     await page.getByTestId("pix-copiar").click();
@@ -120,8 +132,9 @@ test.describe("Pix ativo: modal", () => {
   });
 
   test("copiar só a chave pelo modal usa a chave normalizada", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    await openGift(page, SECOND);
+    await openGift(page, target.index);
     await seedClipboard(page);
     await page.getByTestId("pix-copiar-chave-modal").click();
     await expect.poll(() => readClipboard(page), { message: "área de transferência" }).toBe(TEST_KEY);
@@ -135,9 +148,10 @@ test.describe("Pix ativo: modal", () => {
   });
 
   test("salvar o QR Code baixa um PNG que decodifica para o mesmo Copia e Cola", async ({ page }, testInfo) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    const dialog = await openGift(page, SECOND);
-    const payload = await expectDialogContent(page, second);
+    const dialog = await openGift(page, target.index);
+    const payload = await expectDialogContent(page, target);
 
     const link = dialog.getByTestId("pix-salvar");
     await expect(link).toHaveAttribute("download", /\.png$/i);
@@ -153,16 +167,18 @@ test.describe("Pix ativo: modal", () => {
   });
 
   test("o recebedor aparece no modal e na seção Pix", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
     await expect(page.getByTestId("pix-recebedor")).toContainText(TEST_RECEIVER);
-    const dialog = await openGift(page, SECOND);
+    const dialog = await openGift(page, target.index);
     await expect(dialog.getByTestId("pix-recebedor-modal")).toBeVisible();
     await expect(dialog.getByTestId("pix-recebedor-modal")).toContainText(TEST_RECEIVER);
   });
 
   test("\"avisar os noivos\" aponta para o WhatsApp configurado", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    const dialog = await openGift(page, SECOND);
+    const dialog = await openGift(page, target.index);
     const link = dialog.getByTestId("pix-avisar");
     await expect(link).toBeVisible();
     const url = new URL(await link.getAttribute("href"));
@@ -171,51 +187,72 @@ test.describe("Pix ativo: modal", () => {
   });
 
   test("sem WhatsApp configurado, o aviso aos noivos fica oculto", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page, { whatsapp: "" });
-    const dialog = await openGift(page, SECOND);
+    const dialog = await openGift(page, target.index);
     await expect(dialog.getByTestId("pix-avisar")).toBeHidden();
   });
 
   test("reabrir com outro presente atualiza valor, código e QR Code", async ({ page }) => {
+    const first = requireGift(0);
+    const other = requireGift(2); // se houver menos presentes, repete o último
     await openActiveSite(page);
-    const dialog = await openGift(page, 0);
-    await expectDialogContent(page, { cents: toCents(PRESENTES[0].valor), name: PRESENTES[0].nome });
+    const dialog = await openGift(page, first.index);
+    await expectDialogContent(page, first);
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
 
-    const third = { cents: toCents(PRESENTES[2].valor), name: PRESENTES[2].nome };
-    await openGift(page, 2);
-    const payload = await expectDialogContent(page, third);
+    await openGift(page, other.index);
+    const payload = await expectDialogContent(page, other);
     await expectQrToEncode(page, payload);
   });
 });
 
 test.describe("Pix ativo: fechar o modal", () => {
   test("fecha com Esc", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    const dialog = await openGift(page, SECOND);
+    const dialog = await openGift(page, target.index);
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
   });
 
   test("fecha com o botão ×", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    const dialog = await openGift(page, SECOND);
+    const dialog = await openGift(page, target.index);
     await dialog.getByTestId("pix-fechar").click();
     await expect(dialog).toBeHidden();
   });
 
   test("fecha ao clicar fora, no fundo escurecido", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    const dialog = await openGift(page, SECOND);
+    const dialog = await openGift(page, target.index);
     const { x, y } = await backdropPoint(page, dialog);
     await page.mouse.click(x, y);
     await expect(dialog).toBeHidden();
   });
 
-  test("clicar dentro da caixa do modal não fecha", async ({ page }) => {
+  test("o foco entra no modal ao abrir e volta ao botão do presente ao fechar", async ({ page }) => {
+    const target = requireGift(1);
     await openActiveSite(page);
-    const dialog = await openGift(page, SECOND);
+    const trigger = page.getByTestId("presente-card").nth(target.index).getByTestId("presente-card-botao");
+    const dialog = await openGift(page, target.index);
+
+    const insideDialog = () =>
+      page.evaluate(() => Boolean(document.activeElement?.closest('[data-testid="pix-dialog"]')));
+    expect(await insideDialog(), "foco dentro do modal aberto").toBe(true);
+
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    await expect(trigger, "foco de volta ao botão que abriu o modal").toBeFocused();
+  });
+
+  test("clicar dentro da caixa do modal não fecha", async ({ page }) => {
+    const target = requireGift(1);
+    await openActiveSite(page);
+    const dialog = await openGift(page, target.index);
     await dialog.getByTestId("pix-valor").click();
     await dialog.getByTestId("pix-presente").click();
     await expect(dialog).toBeVisible();
@@ -236,14 +273,15 @@ test.describe("Pix ativo: tipos de chave", () => {
 
   for (const { tipo, raw, normalized } of cases) {
     test(`chave ${tipo}`, async ({ page }) => {
+      const target = requireGift(1);
       await openActiveSite(page, { chave: raw });
       await expect(page.getByTestId("pix-chave")).toHaveText(normalized);
       await seedClipboard(page);
       await page.getByTestId("pix-copiar-chave").click();
       await expect.poll(() => readClipboard(page), { message: "área de transferência" }).toBe(normalized);
 
-      await openGift(page, SECOND);
-      await expectDialogContent(page, { ...second, key: normalized });
+      await openGift(page, target.index);
+      await expectDialogContent(page, { ...target, key: normalized });
     });
   }
 });

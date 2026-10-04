@@ -56,7 +56,8 @@ test.describe("Presentes", () => {
   });
 
   test("presente esgotado fica desabilitado como \"já presenteado\"", async ({ page }) => {
-    await injectGifts(page, "window.PRESENTES[0].esgotado = true;");
+    // Só o primeiro fica esgotado; os demais ficam disponíveis, seja qual for a lista real.
+    await injectGifts(page, "window.PRESENTES.forEach(function (gift, index) { gift.esgotado = index === 0; });");
     await openActiveSite(page);
     const sold = page.getByTestId("presente-card").first();
     await expect(sold).toHaveAttribute("data-esgotado", "true");
@@ -64,8 +65,10 @@ test.describe("Presentes", () => {
     await expect(sold.getByTestId("presente-card-botao")).toHaveText(/já presenteado/i);
 
     // Os demais continuam disponíveis.
-    const other = page.getByTestId("presente-card").nth(1);
-    await expect(other).not.toHaveAttribute("data-esgotado", "true");
-    await expect(other.getByTestId("presente-card-botao")).toBeEnabled();
+    for (let index = 1; index < PRESENTES.length; index++) {
+      const other = page.getByTestId("presente-card").nth(index);
+      await expect(other).not.toHaveAttribute("data-esgotado", "true");
+      await expect(other.getByTestId("presente-card-botao")).toBeEnabled();
+    }
   });
 });

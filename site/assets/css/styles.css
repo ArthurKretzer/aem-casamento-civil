@@ -71,7 +71,7 @@
   --paper-3: #f7f3ed;
   --ink: #6f4f2f;
   --ink-soft: #82643f;       /* texto secundário (contraste AA no papel) */
-  --gold: #b98a4d;           /* dourado do convite: nomes e números grandes */
+  --gold: #b38447;           /* dourado do convite (levemente mais escuro p/ contraste 3:1): nomes e números grandes */
   --gold-text: #876430;      /* dourado para textos pequenos (contraste AA) */
   --gold-deep: #8f6a32;      /* fundo dos botões (texto branco com contraste AA) */
   --gold-light: #e7c995;
