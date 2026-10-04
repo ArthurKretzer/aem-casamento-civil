@@ -10,11 +10,11 @@ window.SITE_CONFIG = {
     // Chave Pix que recebe os presentes.
     // Vazia ("") = o site mostra "Pix em breve" e esconde QR Code e chave.
     // Recomendado: chave ALEATÓRIA (não exponha CPF, telefone ou e-mail).
-    chave: "",
+    chave: "2bb06d88-5678-4aef-a0c1-557e7985b3f5",
 
     // Nome do titular da chave EXATAMENTE como o app do banco mostra na
     // hora de pagar. Os convidados conferem esse nome antes de confirmar.
-    recebedor: "",
+    recebedor: "Arthur Raulino Kretzer",
 
     // Nome e cidade gravados dentro do QR Code (sem acentos;
     // até 25 e 15 caracteres, respectivamente).
@@ -24,7 +24,7 @@ window.SITE_CONFIG = {
 
   // WhatsApp para confirmação de presença e recados: DDI + DDD + número,
   // só dígitos. Exemplo: "5548999998888". Vazio = botões ocultos.
-  whatsapp: "",
+  whatsapp: "5548999263500",
 
   // Data limite para confirmar presença (AAAA-MM-DD).
   rsvpPrazo: "2026-10-15",
