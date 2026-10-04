@@ -28,15 +28,18 @@ const AVAILABLE = GIFTS.map((gift, index) => ({ ...gift, index })).filter((gift)
 const TEST = { chave: "123e4567-e12b-12d1-a456-426655440000", recebedor: "Fulano de Tal", whatsapp: "5548999998888" };
 const NO_KEY = { chave: "", recebedor: "", whatsapp: "" };
 
-/** Troca a chave/recebedor/WhatsApp só no navegador do teste (o config.js real não muda). */
+/**
+ * Troca a chave/recebedor/WhatsApp só no navegador do teste (o config.js real
+ * não muda). O corpo vem do config.js local, sem ir à rede, para funcionar
+ * igual contra o servidor local e contra o site publicado.
+ */
 async function useConfig(page, { chave, recebedor, whatsapp }) {
-  await page.route(/\/config\.js(\?.*)?$/, async (route) => {
-    const response = await route.fetch();
-    const extra = `\nwindow.SITE_CONFIG.pix.chave = ${JSON.stringify(chave)};` +
-      `\nwindow.SITE_CONFIG.pix.recebedor = ${JSON.stringify(recebedor)};` +
-      `\nwindow.SITE_CONFIG.whatsapp = ${JSON.stringify(whatsapp)};`;
-    await route.fulfill({ response, body: (await response.text()) + extra });
-  });
+  const original = fs.readFileSync(path.join(SITE, "config.js"), "utf8");
+  const extra = `\nwindow.SITE_CONFIG.pix.chave = ${JSON.stringify(chave)};` +
+    `\nwindow.SITE_CONFIG.pix.recebedor = ${JSON.stringify(recebedor)};` +
+    `\nwindow.SITE_CONFIG.whatsapp = ${JSON.stringify(whatsapp)};`;
+  await page.route(/\/config\.js(\?.*)?$/, (route) =>
+    route.fulfill({ status: 200, contentType: "text/javascript; charset=utf-8", body: original + extra }));
 }
 
 /** Erros de console e respostas com falha (mesma origem) durante o teste. */
