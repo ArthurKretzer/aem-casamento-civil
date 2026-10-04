@@ -69,4 +69,10 @@ window.PRESENTES = [
     valor: 300,
     cota: 75,
   },
+  {
+    id: "aulas-de-espanhol",
+    nome: "Aulas de espanhol para o casal",
+    valor: 360,
+    cota: 60,
+  },
 ];
