@@ -62,6 +62,7 @@ Em `site/presentes.js` cada presente é um bloco `{ ... }`, e a ordem do arquivo
   },
 ```
 
+- **Presente caro em cotas**: acrescente `cota: 300,` (o valor de cada cota). O card mostra "R$ 300 a cota" e "presente completo: R$ 3.000", e no modal o convidado escolhe quantas cotas quer dar (de 1 até o presente completo); o Pix e o QR Code acompanham. As cotas **não são contadas nem esgotam**: é só uma forma de dar parte de um presente. Exemplo: `{ id: "lua-de-mel", nome: "Nossa lua de mel", valor: 3000, cota: 300, imagem: "..." }`.
 - **Esgotado**: acrescente `esgotado: true,` e o card passa a mostrar "já presenteado".
 - **Tirar um presente**: apague o bloco inteiro.
 - O card de "outro valor" (valor livre) já existe e não entra nessa lista.

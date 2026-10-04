@@ -919,3 +919,29 @@ describe("validar-dados: dados de exemplo não podem ir ao ar", () => {
     assertHas(report.errors, { file: CONFIG_FILE, where: "pix.recebedor", pattern: /nome de exemplo/ });
   });
 });
+
+describe("validar-dados: presentes em cotas", () => {
+  const where = 'presente nº 1 ("a") › cota';
+  const withQuota = (gift) => ({ gifts: [{ id: "a", nome: "A", valor: 1000, ...gift }] });
+
+  it("cota válida (o valor é múltiplo da cota): sem erro nem aviso", () => {
+    const report = validate(withQuota({ cota: 250 }));
+    assert.deepEqual(report.errors, []);
+    assert.deepEqual(report.warnings, []);
+  });
+
+  it("cota maior que o valor do presente é ERRO", () => {
+    assertHas(validate(withQuota({ cota: 1500 })).errors, { file: GIFTS_FILE, where, pattern: /não pode ser maior/ });
+  });
+
+  it("cota entre aspas ou zerada é ERRO", () => {
+    assertHas(validate(withQuota({ cota: "250" })).errors, { file: GIFTS_FILE, where, pattern: /sem aspas/ });
+    assertHas(validate(withQuota({ cota: 0 })).errors, { file: GIFTS_FILE, where, pattern: /maior que zero/ });
+  });
+
+  it("valor que não fecha em cotas inteiras é AVISO (mostra até quantas cotas)", () => {
+    const report = validate(withQuota({ cota: 300 }));
+    assert.deepEqual(report.errors, []);
+    assertHas(report.warnings, { file: GIFTS_FILE, where, pattern: /até 3 cotas = R\$ 900,00/ });
+  });
+});

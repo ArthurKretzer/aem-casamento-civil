@@ -6,6 +6,9 @@
 //   id         identificador único: letras minúsculas, números e "-"
 //   nome       nome que aparece no card
 //   valor      valor em reais, ex.: 150 ou 150.5 (use ponto, não vírgula)
+//   cota       (opcional) valor de cada cota, para presentes caros: o card
+//              mostra "R$ 300 a cota" e o convidado escolhe quantas cotas dar
+//              (até o presente completo). Nada é contado nem esgota.
 //   imagem     (opcional) foto em assets/img/presentes/, de preferência
 //              JPEG 960×720 com até ~150 KB (veja o README)
 //   imagemAlt  (opcional) descrição curta da foto, para leitores de tela

@@ -145,6 +145,15 @@
         <p class="section-kicker" id="dialogKicker">seu presente</p>
         <h2 id="dialogTitle" data-testid="pix-presente"></h2>
         <p class="dialog-amount" id="dialogAmount" data-testid="pix-valor"></p>
+        <!-- Presentes em cotas: o convidado escolhe quantas cotas quer dar -->
+        <div class="quota-picker" data-testid="pix-cotas" hidden>
+          <div class="quota-picker__controls">
+            <button type="button" data-testid="pix-cotas-menos" aria-label="Uma cota a menos">−</button>
+            <output data-testid="pix-cotas-quantidade" aria-label="Quantidade de cotas">1</output>
+            <button type="button" data-testid="pix-cotas-mais" aria-label="Uma cota a mais">+</button>
+          </div>
+          <p class="quota-picker__info" data-testid="pix-cotas-info"></p>
+        </div>
       </div>
 
       <div class="dialog-copy">

@@ -23,6 +23,8 @@ function loadSiteData(file, name) {
 const CONFIG = loadSiteData("config.js", "SITE_CONFIG");
 const GIFTS = loadSiteData("presentes.js", "PRESENTES");
 const AVAILABLE = GIFTS.map((gift, index) => ({ ...gift, index })).filter((gift) => !gift.esgotado);
+/** Valor do Pix ao abrir o presente: o presente inteiro, ou 1 cota se ele for em cotas. */
+const openingCents = (gift) => PixBR.parseAmountCents(gift.cota ?? gift.valor);
 
 // Chave do exemplo oficial do Banco Central: só existe nos testes.
 const TEST = { chave: "123e4567-e12b-12d1-a456-426655440000", recebedor: "Fulano de Tal", whatsapp: "5548999998888" };
@@ -85,9 +87,9 @@ test("um card por presente, com nome, valor e foto", async ({ page }) => {
   await expect(cards).toHaveCount(GIFTS.length);
   for (const [index, gift] of GIFTS.entries()) {
     const card = cards.nth(index);
-    const cents = PixBR.parseAmountCents(gift.valor);
+    const price = PixBR.formatBRL(openingCents(gift), { compact: true });
     await expect(card.getByTestId("presente-nome")).toHaveText(gift.nome);
-    await expect(card.getByTestId("presente-valor")).toHaveText(PixBR.formatBRL(cents, { compact: true }));
+    await expect(card.getByTestId("presente-valor")).toHaveText(gift.cota ? `${price} a cota` : price);
     if (gift.imagem) {
       const image = card.locator("img");
       await image.scrollIntoViewIfNeeded();
@@ -111,7 +113,7 @@ test("presentear abre o modal com o Pix Copia e Cola e um QR Code que lê o mesm
   const errors = watchErrors(page);
   await openSite(page, TEST);
   const gift = AVAILABLE[Math.min(1, AVAILABLE.length - 1)];
-  const cents = PixBR.parseAmountCents(gift.valor);
+  const cents = openingCents(gift);
   await page.getByTestId("presente-card-botao").nth(gift.index).click();
 
   const dialog = page.getByTestId("pix-dialog");
@@ -152,6 +154,33 @@ test("valor livre: '150,50' gera o Pix de R$ 150,50 e valor inválido mostra err
   expect(await page.getByTestId("pix-payload").inputValue()).toBe(expectedPayload(15050));
 });
 
+test("presente em cotas: o convidado escolhe quantas cotas e o Pix acompanha", async ({ page }) => {
+  const gift = { id: "lua-de-mel-teste", nome: "Lua de mel (teste)", valor: 1000, cota: 250 };
+  const gifts = fs.readFileSync(path.join(SITE, "presentes.js"), "utf8") + `\nwindow.PRESENTES.push(${JSON.stringify(gift)});`;
+  await page.route(/\/presentes\.js(\?.*)?$/, (route) =>
+    route.fulfill({ status: 200, contentType: "text/javascript; charset=utf-8", body: gifts }));
+  await openSite(page, TEST);
+
+  const card = page.getByTestId("presente-card").last();
+  await expect(card.getByTestId("presente-valor")).toHaveText(`${PixBR.formatBRL(25000, { compact: true })} a cota`);
+  await expect(card.getByTestId("presente-cota")).toContainText(PixBR.formatBRL(100000, { compact: true }));
+  await card.getByTestId("presente-card-botao").click();
+
+  await expect(page.getByTestId("pix-cotas")).toBeVisible();
+  expect(await page.getByTestId("pix-payload").inputValue()).toBe(expectedPayload(25000));
+  await page.getByTestId("pix-cotas-mais").click();
+  await page.getByTestId("pix-cotas-mais").click();
+  await expect(page.getByTestId("pix-cotas-quantidade")).toHaveText("3");
+  await expect(page.getByTestId("pix-valor")).toHaveText(PixBR.formatBRL(75000));
+  const payload = await page.getByTestId("pix-payload").inputValue();
+  expect(payload).toBe(expectedPayload(75000));
+  expect(await readQr(page.getByTestId("pix-qr"))).toBe(payload);
+
+  await page.getByTestId("pix-cotas-mais").click(); // 4 cotas = presente completo
+  await expect(page.getByTestId("pix-cotas-mais")).toBeDisabled();
+  await expect(page.getByTestId("pix-valor")).toHaveText(PixBR.formatBRL(100000));
+});
+
 test("no celular (360px) não há rolagem horizontal", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await openSite(page, TEST);
@@ -174,7 +203,7 @@ test("chave real do config.js (quando preenchida) gera um Pix válido em cada pr
   await openSite(page); // config.js real, sem injeção
   await expect(page.locator("html")).toHaveAttribute("data-pix", "ativo");
   for (const gift of AVAILABLE) {
-    const cents = PixBR.parseAmountCents(gift.valor);
+    const cents = openingCents(gift);
     await page.getByTestId("presente-card-botao").nth(gift.index).click();
     const payload = await page.getByTestId("pix-payload").inputValue();
     expect(payload).toBe(expectedPayload(cents, CONFIG.pix.chave));

@@ -69,6 +69,18 @@
     return cents > 0 ? cents : NaN;
   }
 
+  // Presente em cotas: valor de cada cota e quantas cotas fecham o presente.
+  // As cotas não são contadas nem esgotam: é só para dar parte de um presente.
+  function giftQuota(gift, cents) {
+    if (gift.cota === undefined || gift.cota === null || gift.cota === "") return null;
+    const quotaCents = Pix ? Pix.parseAmountCents(gift.cota) : Math.round(Number(gift.cota) * 100);
+    if (!Number.isInteger(quotaCents) || quotaCents <= 0 || quotaCents > cents) {
+      console.error(`[Presentes] Cota inválida em "${gift.nome}" (confira o valor da cota):`, gift.cota);
+      return null;
+    }
+    return { cents: quotaCents, max: Math.max(1, Math.floor(cents / quotaCents)) };
+  }
+
   function formatMoney(cents, compact) {
     return Pix ? Pix.formatBRL(cents, { compact }) : `R$ ${(cents / 100).toFixed(2).replace(".", ",")}`;
   }
@@ -88,6 +100,7 @@
     card.dataset.id = gift.id;
     card.dataset.centavos = String(cents);
     if (gift.esgotado) card.dataset.esgotado = "true";
+    const quota = giftQuota(gift, cents);
 
     const media = document.createElement("div");
     media.className = "gift__media";
@@ -125,8 +138,23 @@
     const price = document.createElement("p");
     price.className = "gift__price";
     price.dataset.testid = "presente-valor";
-    price.textContent = formatMoney(cents, true);
+    price.textContent = formatMoney(quota ? quota.cents : cents, true);
+    if (quota) {
+      const unit = document.createElement("span");
+      unit.className = "gift__unit";
+      unit.textContent = "a cota";
+      price.append(" ", unit);
+    }
     body.append(price);
+
+    if (quota) {
+      card.dataset.cota = String(quota.cents);
+      const full = document.createElement("p");
+      full.className = "gift__full";
+      full.dataset.testid = "presente-cota";
+      full.textContent = `presente completo: ${formatMoney(cents, true)}`;
+      body.append(full);
+    }
 
     const button = document.createElement("button");
     button.type = "button";
@@ -140,8 +168,9 @@
       button.textContent = "disponível em breve";
     } else {
       button.textContent = "presentear →";
-      button.setAttribute("aria-label", `Presentear: ${gift.nome} (${formatMoney(cents, true)})`);
-      button.addEventListener("click", () => openPix(cents, gift.nome));
+      const label = quota ? `cotas de ${formatMoney(quota.cents, true)}` : formatMoney(cents, true);
+      button.setAttribute("aria-label", `Presentear: ${gift.nome} (${label})`);
+      button.addEventListener("click", () => (quota ? openPix(quota.cents, gift.nome, quota.max) : openPix(cents, gift.nome)));
     }
     body.append(button);
 
@@ -251,8 +280,13 @@
 
   // ---------- Modal ----------
   const dialog = byTestId("pix-dialog");
-  const dialogTitle = byTestId("pix-valor");
-  const dialogGiftName = byTestId("pix-presente");
+  const amountText = byTestId("pix-valor");
+  const giftNameText = byTestId("pix-presente");
+  const quotaPicker = byTestId("pix-cotas");
+  const quotaCount = byTestId("pix-cotas-quantidade");
+  const quotaLess = byTestId("pix-cotas-menos");
+  const quotaMore = byTestId("pix-cotas-mais");
+  const quotaInfo = byTestId("pix-cotas-info");
   const payloadField = byTestId("pix-payload");
   const qrImage = byTestId("pix-qr");
   const saveQrLink = byTestId("pix-salvar");
@@ -262,8 +296,29 @@
 
   let currentPayload = "";
 
-  function openPix(cents, giftName) {
+  // Presente aberto no modal. "quantity" só muda em presentes com cotas.
+  let current = null;
+
+  function openPix(unitCents, giftName, maxQuantity = 1) {
     if (!pix) return;
+    current = { name: giftName, unitCents, quantity: 1, maxQuantity };
+    if (!updatePix()) return;
+    copyFeedback.textContent = "";
+
+    if (typeof dialog.showModal === "function") {
+      dialog.showModal();
+    } else {
+      dialog.classList.add("is-fallback");
+      dialog.setAttribute("open", "");
+    }
+    // Ajusta a altura do campo ao código inteiro (só dá para medir com o modal aberto).
+    fitPayloadField();
+    copyPayloadButton.focus();
+  }
+
+  // Monta o código Pix, o QR Code e os textos para o valor atual.
+  function updatePix() {
+    const cents = current.unitCents * current.quantity;
     let payload;
     try {
       payload = Pix.buildPixPayload({ key: pix.key, name: pix.name, city: pix.city, cents });
@@ -271,15 +326,23 @@
       if (!check.ok) throw new Error(check.errors.join("; "));
     } catch (error) {
       console.error(`[Pix] Não foi possível gerar o código: ${error.message}`);
-      return;
+      return false;
     }
     currentPayload = payload;
     const amount = formatMoney(cents, false);
 
-    dialogTitle.textContent = amount;
-    dialogGiftName.textContent = giftName;
+    amountText.textContent = amount;
+    giftNameText.textContent = current.name;
     payloadField.value = payload;
-    copyFeedback.textContent = "";
+
+    const hasQuotas = current.maxQuantity > 1;
+    quotaPicker.hidden = !hasQuotas;
+    if (hasQuotas) {
+      quotaCount.textContent = String(current.quantity);
+      quotaInfo.textContent = `${current.quantity === 1 ? "cota" : "cotas"} de ${formatMoney(current.unitCents, true)} · o presente completo são ${current.maxQuantity} cotas`;
+      quotaLess.disabled = current.quantity <= 1;
+      quotaMore.disabled = current.quantity >= current.maxQuantity;
+    }
 
     let dataUrl = "";
     try {
@@ -301,21 +364,25 @@
     saveQrLink.download = `pix-arthur-e-marina-${(cents / 100).toFixed(2).replace(".", "-").replace(/-00$/, "")}.png`;
 
     if (hasWhatsapp) {
-      notifyLink.href = whatsappLink(`Oi, Arthur e Marina! Acabei de enviar um presente pelo Pix: ${giftName} (${amount}). Com carinho,`);
+      const what = hasQuotas
+        ? `${current.quantity} ${current.quantity === 1 ? "cota" : "cotas"} de ${current.name}`
+        : current.name;
+      notifyLink.href = whatsappLink(`Oi, Arthur e Marina! Acabei de enviar um presente pelo Pix: ${what} (${amount}). Com carinho,`);
       notifyLink.hidden = false;
     } else {
       notifyLink.hidden = true;
     }
+    return true;
+  }
 
-    if (typeof dialog.showModal === "function") {
-      dialog.showModal();
-    } else {
-      dialog.classList.add("is-fallback");
-      dialog.setAttribute("open", "");
-    }
-    // Ajusta a altura do campo ao código inteiro (só dá para medir com o modal aberto).
+  function changeQuantity(step) {
+    if (!current) return;
+    const quantity = Math.min(current.maxQuantity, Math.max(1, current.quantity + step));
+    if (quantity === current.quantity) return;
+    current.quantity = quantity;
+    updatePix();
+    copyFeedback.textContent = "";
     fitPayloadField();
-    copyPayloadButton.focus();
   }
 
   function fitPayloadField() {
@@ -331,6 +398,8 @@
 
   function setupDialog() {
     byTestId("pix-fechar").addEventListener("click", closePix);
+    quotaLess.addEventListener("click", () => changeQuantity(-1));
+    quotaMore.addEventListener("click", () => changeQuantity(1));
 
     // Clique no fundo escurecido (fora da caixa) fecha o modal, desde que o
     // botão também tenha sido pressionado no fundo (arrastar uma seleção de

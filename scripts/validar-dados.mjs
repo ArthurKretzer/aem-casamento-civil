@@ -38,7 +38,7 @@ const CONFIG_KEYS = ["pix", "whatsapp", "rsvpPrazo", "siteUrl"];
 const PIX_KEYS = ["chave", "recebedor", "nomeQr", "cidadeQr"];
 // Chave do exemplo oficial do Banco Central: aparece no README e nos testes, nunca no site.
 const EXAMPLE_KEY = "123e4567-e12b-12d1-a456-426655440000";
-const GIFT_KEYS = ["id", "nome", "valor", "imagem", "imagemAlt", "descricao", "esgotado"];
+const GIFT_KEYS = ["id", "nome", "valor", "cota", "imagem", "imagemAlt", "descricao", "esgotado"];
 
 // ---------------------------------------------------------------------
 // Utilidades
@@ -330,6 +330,23 @@ function checkGifts(rootDir, siteDir, addError, addWarning) {
     // valor
     const valueProblem = describeValueProblem(gift.valor);
     if (valueProblem) error("valor", valueProblem);
+
+    // cota (opcional): o convidado escolhe quantas cotas dar; nada é contado.
+    if (gift.cota !== undefined) {
+      const quotaProblem = describeValueProblem(gift.cota);
+      if (quotaProblem) {
+        error("cota", quotaProblem);
+      } else if (!valueProblem) {
+        const quotaCents = Math.round(gift.cota * 100);
+        const totalCents = Math.round(gift.valor * 100);
+        if (quotaCents > totalCents) {
+          error("cota", "a cota (" + gift.cota + ") não pode ser maior que o valor do presente (" + gift.valor + ").");
+        } else if (totalCents % quotaCents !== 0) {
+          const max = Math.floor(totalCents / quotaCents);
+          warning("cota", "o valor do presente (" + gift.valor + ") não é múltiplo da cota (" + gift.cota + "): o convidado poderá dar até " + max + " cotas = R$ " + ((max * quotaCents) / 100).toFixed(2).replace(".", ",") + ".");
+        }
+      }
+    }
 
     // campos opcionais
     if (gift.descricao !== undefined && typeof gift.descricao !== "string") {
