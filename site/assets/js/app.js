@@ -441,6 +441,16 @@
     });
   }
 
+  // ---------- Confirmação de presença (Google Forms) ----------
+  function setupRsvp() {
+    const url = String(CONFIG.formularioPresenca || "").trim();
+    if (!/^https:\/\/(forms\.gle\/|docs\.google\.com\/forms\/)/.test(url)) return;
+    const button = byTestId("rsvp-botao");
+    button.href = url;
+    button.hidden = false;
+    byTestId("rsvp-texto").textContent = "Se preferir, fale diretamente com a gente, o Arthur ou a Marina.";
+  }
+
   // ---------- Menu: destaca a seção visível ----------
   function setupNav() {
     const links = [...document.querySelectorAll(".site-nav__links a")];
@@ -462,5 +472,6 @@
   setupCustomGift();
   setupReceiver();
   setupDialog();
+  setupRsvp();
   setupNav();
 })();

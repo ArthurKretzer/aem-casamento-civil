@@ -38,6 +38,7 @@ Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida,
 | `pix.nomeQr` | Nome gravado dentro do QR Code: sem acentos, até 25 letras (ex.: `"ARTHUR E MARINA"`). |
 | `pix.cidadeQr` | Cidade gravada no QR Code: sem acentos, até 15 letras (ex.: `"SAO JOSE"`). |
 | `whatsapp` | DDI + DDD + número, só dígitos (ex.: `"5548999998888"`). Usado só no botão **avisar os noivos**, depois do Pix. **Vazio = o botão some.** |
+| `formularioPresenca` | Link do Google Forms de confirmação de presença (`https://forms.gle/...`). Aparece como o botão **confirmar presença**; as respostas ficam na planilha ligada ao formulário. **Vazio = o botão some** e o site pede para falar com vocês. |
 | `siteUrl` | Endereço público do site, terminando em `/`. |
 
 ### O modo "Pix em breve"

@@ -580,7 +580,7 @@ section[id] { scroll-margin-top: 57px; }
   color: #9a3d26;
 }
 
-.custom-gift button, .btn--primary {
+.custom-gift button, .btn--primary, .rsvp-button {
   border: 0;
   background: var(--gold-deep);
   color: white;
@@ -595,7 +595,7 @@ section[id] { scroll-margin-top: 57px; }
   transition: background-color .2s ease;
 }
 
-.custom-gift button:hover, .btn--primary:hover { background: var(--ink); }
+.custom-gift button:hover, .btn--primary:hover, .rsvp-button:hover { background: var(--ink); }
 
 .custom-gift button:disabled {
   cursor: default;
@@ -623,6 +623,12 @@ section[id] { scroll-margin-top: 57px; }
 
 /* ---------- Confirmação de presença ---------- */
 .section--rsvp { text-align: center; }
+
+.rsvp-button {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 36px;
+}
 
 .rsvp-alt {
   margin: 30px auto 0;

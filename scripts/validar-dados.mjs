@@ -34,7 +34,7 @@ const GIFT_ID_RE = /^[a-z0-9-]+$/;
 const MIN_VALUE_REAIS = 1;
 const MAX_VALUE_REAIS = 100000;
 
-const CONFIG_KEYS = ["pix", "whatsapp", "siteUrl"];
+const CONFIG_KEYS = ["pix", "whatsapp", "formularioPresenca", "siteUrl"];
 const PIX_KEYS = ["chave", "recebedor", "nomeQr", "cidadeQr"];
 // Chave do exemplo oficial do Banco Central: aparece no README e nos testes, nunca no site.
 const EXAMPLE_KEY = "123e4567-e12b-12d1-a456-426655440000";
@@ -174,6 +174,13 @@ function checkConfig(rootDir, addError, addWarning) {
       "whatsapp",
       show(config.whatsapp) + " não é válido. Use só números, com o código do país (55) e o DDD, sem espaços, +, parênteses ou traços (12 ou 13 dígitos). Exemplo: \"5548999998888\". Para esconder os botões, deixe \"\"."
     );
+  }
+
+  // --- Formulário de confirmação de presença (opcional) -------------
+  if ("formularioPresenca" in config && needText(config.formularioPresenca, "formularioPresenca")
+      && config.formularioPresenca !== ""
+      && !/^https:\/\/(forms\.gle\/|docs\.google\.com\/forms\/)/.test(config.formularioPresenca)) {
+    error("formularioPresenca", show(config.formularioPresenca) + " não é um link do Google Forms. Use o link de \"Enviar\" do formulário, por exemplo \"https://forms.gle/...\". Para esconder o botão, deixe \"\".");
   }
 
   // --- Endereço do site ----------------------------------------------

@@ -338,6 +338,12 @@ describe("validar-dados: dados corretos", () => {
     }
   });
 
+  it("aceita formulário de presença vazio, ausente ou do Google Forms", () => {
+    for (const formularioPresenca of ["", "https://forms.gle/MrdA3pDX5QVpg98x8", "https://docs.google.com/forms/d/e/abc/viewform"]) {
+      assert.deepEqual(validate({ config: { formularioPresenca } }).errors, [], formularioPresenca);
+    }
+  });
+
   it("aceita WhatsApp com 12 ou 13 dígitos e o vazio", () => {
     for (const whatsapp of ["", "5548999998888", "554833334444"]) {
       assert.deepEqual(validate({ config: { whatsapp } }).errors, [], whatsapp);
@@ -406,6 +412,11 @@ describe("validar-dados: ERROS em config.js", () => {
       name: `whatsapp ${JSON.stringify(whatsapp)}`,
       options: { config: { whatsapp } },
       expect: { file: CONFIG_FILE, where: "whatsapp", pattern: /não é válido.*55.*5548999998888/ },
+    })),
+    ...["https://exemplo.com/forms", "http://forms.gle/abc", "forms.gle/abc"].map((formularioPresenca) => ({
+      name: `formularioPresenca ${JSON.stringify(formularioPresenca)}`,
+      options: { config: { formularioPresenca } },
+      expect: { file: CONFIG_FILE, where: "formularioPresenca", pattern: /Google Forms/ },
     })),
     ...["http://arthurkretzer.github.io/aem-casamento-civil/", "arthurkretzer.github.io/aem-casamento-civil/", "//arthurkretzer.github.io/", "", "ftp://x.y/"].map((siteUrl) => ({
       name: `siteUrl ${JSON.stringify(siteUrl)} (não é https)`,

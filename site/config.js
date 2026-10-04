@@ -26,6 +26,10 @@ window.SITE_CONFIG = {
   // número, só dígitos. Exemplo: "5548999998888". Vazio = botão oculto.
   whatsapp: "5548999263500",
 
+  // Link do Google Forms de confirmação de presença (https://forms.gle/...).
+  // Vazio = o botão "confirmar presença" some e o site pede para falar com vocês.
+  formularioPresenca: "https://forms.gle/MrdA3pDX5QVpg98x8",
+
   // Endereço público do site, terminando em "/".
   siteUrl: "https://arthurkretzer.github.io/aem-casamento-civil/",
 };

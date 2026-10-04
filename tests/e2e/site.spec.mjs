@@ -181,7 +181,7 @@ test("presente em cotas: o convidado escolhe quantas cotas e o Pix acompanha", a
   await expect(page.getByTestId("pix-valor")).toHaveText(PixBR.formatBRL(100000));
 });
 
-test("menu leva às seções; traje casual e presença sem WhatsApp nem prazo", async ({ page }) => {
+test("menu leva às seções; traje casual; presença pelo Google Forms, sem WhatsApp nem prazo", async ({ page }) => {
   await openSite(page, TEST);
   const menu = page.getByTestId("menu");
   await expect(menu.getByRole("link", { name: "Celebração" })).toBeVisible();
@@ -195,6 +195,10 @@ test("menu leva às seções; traje casual e presença sem WhatsApp nem prazo", 
   const rsvp = page.getByTestId("rsvp");
   await expect(rsvp).toContainText(/confirme sua presença/i);
   await expect(rsvp.locator('a[href*="wa.me"]')).toHaveCount(0);
+  if (CONFIG.formularioPresenca) {
+    await expect(page.getByTestId("rsvp-botao")).toHaveAttribute("href", CONFIG.formularioPresenca);
+    await expect(page.getByTestId("rsvp-botao")).toHaveAttribute("target", "_blank");
+  }
   await expect(rsvp).not.toContainText(/\d{1,2} de \w+|até/);
 });
 
