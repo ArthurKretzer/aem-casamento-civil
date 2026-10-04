@@ -206,11 +206,4 @@ CLAUDE.md                    instruções para futuras sessões do Claude
 ### Fotos
 
 <!-- CREDITOS-FOTOS -->
-Fotos do [Unsplash](https://unsplash.com), sob a [Unsplash License](https://unsplash.com/license) (uso livre, crédito opcional), recortadas em 960×720 e comprimidas para o site.
-
-| Presente | Arquivo | Foto original |
-| --- | --- | --- |
-| Um pequeno gesto | `site/assets/img/presentes/pequeno-gesto.jpg` | [Unsplash `photo-1563241527-3004b7be0ffd`](https://images.unsplash.com/photo-1563241527-3004b7be0ffd) |
-| Um jantar especial | `site/assets/img/presentes/jantar-especial.jpg` | [Unsplash `photo-1511795409834-ef04bbd61622`](https://images.unsplash.com/photo-1511795409834-ef04bbd61622) |
-| Uma experiência a dois | `site/assets/img/presentes/experiencia-a-dois.jpg` | [Unsplash `photo-1707296819777-f96b799efb41`](https://images.unsplash.com/photo-1707296819777-f96b799efb41) |
-| Nossa nova casa | `site/assets/img/presentes/nova-casa.jpg` | [Unsplash `photo-1631679706909-1844bbd07221`](https://images.unsplash.com/photo-1631679706909-1844bbd07221) |
+Os presentes ainda estão sem foto (o card mostra o enfeite ✦). Ao adicionar fotos, registre aqui a origem e a licença de cada uma.
