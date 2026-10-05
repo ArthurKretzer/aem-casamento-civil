@@ -166,8 +166,10 @@ describe("API pública e carregamento", () => {
       "PixError",
       "buildPixPayload",
       "crc16",
+      "describeGift",
       "formatAmountEMV",
       "formatBRL",
+      "messageRoom",
       "normalizeKey",
       "normalizeText",
       "parseAmountCents",
@@ -1401,6 +1403,62 @@ describe("conferência cruzada com a pix-utils", () => {
 // ---------------------------------------------------------------------
 // QR Code: gerar, "fotografar" e ler de volta
 // ---------------------------------------------------------------------
+
+describe("presente dentro do Pix (mensagem 26.02 e identificador 62.05)", () => {
+  const { describeGift, messageRoom, parsePix, hasError } = { ...PixBR, ...pixUtils };
+  const KEY = "2bb06d88-5678-4aef-a0c1-557e7985b3f5";
+  const build = (reference, key = KEY) =>
+    buildPixPayload({ key, name: "ARTHUR E MARINA", city: "SAO JOSE", cents: 15000, ...reference });
+
+  it("a pix-utils lê a mensagem e o identificador do presente", () => {
+    const reference = describeGift({ id: "parrillada", name: "Parrillada na Argentina", quantity: 2, quotas: true }, KEY);
+    assert.deepEqual(reference, { message: "Parrillada na Argentina - 2 cotas", txid: "PARRILLADAX2" });
+    const parsed = parsePix(build(reference));
+    assert.equal(hasError(parsed), false);
+    assert.equal(parsed.infoAdicional, reference.message);
+    assert.equal(parsed.txid, "PARRILLADAX2");
+  });
+
+  it("usa 'Presente:' quando cabe, sem acentos, e corta nomes longos entre palavras", () => {
+    assert.equal(describeGift({ id: "valor-livre", name: "Contribuição livre" }, KEY).message, "Presente: Contribuicao livre");
+    assert.equal(describeGift({ id: "kh", name: "Kingdom Hearts 4 para o noivo", quantity: 1, quotas: true }, KEY).message,
+      "Kingdom Hearts 4 - 1 cota");
+    assert.equal(describeGift({ id: "abaporu", name: "1 ingresso para ver o Abaporu na Argentina" }, KEY).message,
+      "1 ingresso para ver o Abaporu");
+  });
+
+  it("identificador só com letras e números, até 25, com as cotas no fim", () => {
+    const { txid } = describeGift({ id: "um-presente-com-um-id-bem-comprido", name: "X", quantity: 10, quotas: true }, KEY);
+    assert.match(txid, /^[A-Z0-9]{1,25}$/);
+    assert.ok(txid.endsWith("X10"));
+    assert.equal(describeGift({ id: "", name: "X" }, KEY).txid, "***");
+  });
+
+  it("o campo 26 nunca passa de 99, mesmo com a chave mais longa (mensagem é omitida)", () => {
+    assert.equal(messageRoom(KEY), 37);
+    for (const size of [40, 55, 60, 65]) {
+      const key = "a".repeat(size) + "@example.com";
+      const reference = describeGift({ id: "parrillada", name: "Parrillada na Argentina", quantity: 2, quotas: true }, key);
+      const payload = build(reference, key);
+      assert.equal(validatePayload(payload).ok, true, key);
+      assert.equal(hasError(parsePix(payload)), false, key);
+    }
+  });
+
+  it("cada presente de presentes.js gera um Pix válido com a sua mensagem", () => {
+    const context = { window: {} };
+    vm.runInNewContext(readFileSync(new URL("../../site/presentes.js", import.meta.url), "utf8"), context);
+    for (const gift of context.window.PRESENTES) {
+      for (const quantity of gift.cota ? [1, Math.round(gift.valor / gift.cota)] : [1]) {
+        const reference = describeGift({ id: gift.id, name: gift.nome, quantity, quotas: Boolean(gift.cota) }, KEY);
+        assert.ok(reference.message.length > 0 && reference.message.length <= 37, reference.message);
+        const parsed = parsePix(build(reference));
+        assert.equal(hasError(parsed), false, gift.id);
+        assert.equal(parsed.infoAdicional, reference.message);
+      }
+    }
+  });
+});
 
 describe("QR Code (ida e volta com qrcode-generator e jsQR)", () => {
   const QR_DARK = [0x6f, 0x4f, 0x2f]; // #6f4f2f, a cor escura do site

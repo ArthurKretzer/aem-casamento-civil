@@ -95,6 +95,7 @@ O dinheiro dos presentes cai direto na conta de vocês, então vale cuidar bem d
 - [ ] Com o site publicado aberto **no computador**, um **Pix real de R$ 1 lendo o QR Code** com o app do banco no celular (use "outro valor" e digite `1`).
 - [ ] Com o site aberto **no celular**, outro **Pix real de R$ 1 pelo Pix Copia e Cola**: toque em "copiar código Pix" e cole no app do banco.
 - [ ] Os dois testes (QR Code e Copia e Cola) em **2 bancos diferentes**, por exemplo um banco tradicional e uma conta digital.
+- [ ] No extrato ou no comprovante desses Pix de teste, confiram se aparece **qual foi o presente**. O site grava o presente no próprio código Pix, em dois campos oficiais: a **mensagem** (ex.: "Parrillada na Argentina - 2 cotas", até 37 caracteres, sem acentos) e o **identificador** (ex.: `PARRILLADAX2`). A maioria dos bancos mostra a mensagem a quem paga e a repassa a quem recebe, mas isso varia de banco para banco.
 - [ ] Em cada teste: o nome do recebedor na tela do banco é o esperado, o valor é o certo e o dinheiro apareceu no extrato.
 - [ ] Ao abrir um presente, o recebedor mostrado no modal ("O recebedor deve aparecer como...") é o de vocês.
 - [ ] `whatsapp` preenchido no `config.js` e o botão **avisar os noivos** abre a conversa certa (lembrem que o número fica público no site e no repositório).

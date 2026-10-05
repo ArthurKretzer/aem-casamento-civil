@@ -63,9 +63,13 @@ async function openSite(page, config) {
   await expect(page.getByTestId("presente-card").first()).toBeVisible();
 }
 
-function expectedPayload(cents, chave = TEST.chave) {
-  return PixBR.buildPixPayload({ key: PixBR.normalizeKey(chave).value, name: CONFIG.pix.nomeQr, city: CONFIG.pix.cidadeQr, cents });
+/** Código Pix esperado, com o presente na mensagem e no identificador. */
+function expectedPayload(cents, gift, chave = TEST.chave) {
+  const reference = PixBR.describeGift(gift, chave);
+  return PixBR.buildPixPayload({ key: PixBR.normalizeKey(chave).value, name: CONFIG.pix.nomeQr, city: CONFIG.pix.cidadeQr, cents, ...reference });
 }
+const asGift = (gift, quantity = 1) => ({ id: gift.id, name: gift.nome, quantity, quotas: Boolean(gift.cota) });
+const CUSTOM = { id: "valor-livre", name: "Contribuição livre" };
 
 async function readQr(locator) {
   const png = pngjs.PNG.sync.read(await locator.screenshot());
@@ -109,7 +113,7 @@ test("sem chave Pix, os presentes aparecem como 'disponível em breve'", async (
   await expect(page.getByTestId("pix-dialog")).not.toBeVisible();
 });
 
-test("presentear abre o modal com o Pix Copia e Cola e um QR Code que lê o mesmo código", async ({ page }) => {
+test("presentear abre o modal com o Pix (com o presente na mensagem) e um QR Code que lê o mesmo código", async ({ page }) => {
   const errors = watchErrors(page);
   await openSite(page, TEST);
   const gift = AVAILABLE[Math.min(1, AVAILABLE.length - 1)];
@@ -123,8 +127,9 @@ test("presentear abre o modal com o Pix Copia e Cola e um QR Code que lê o mesm
   await expect(page.getByTestId("pix-recebedor-modal")).toHaveText(TEST.recebedor);
 
   const payload = await page.getByTestId("pix-payload").inputValue();
-  expect(payload).toBe(expectedPayload(cents));
+  expect(payload).toBe(expectedPayload(cents, asGift(gift)));
   expect(PixBR.validatePayload(payload).ok).toBe(true);
+  expect(PixBR.validatePayload(payload).fields["26"]["02"]).toBe(PixBR.describeGift(asGift(gift), TEST.chave).message);
 
   const qr = page.getByTestId("pix-qr");
   await expect(qr).toHaveAttribute("data-ready", "true");
@@ -151,7 +156,7 @@ test("valor livre: '150,50' gera o Pix de R$ 150,50 e valor inválido mostra err
   await input.fill("150,50");
   await page.getByTestId("valor-livre-botao").click();
   await expect(page.getByTestId("pix-dialog")).toBeVisible();
-  expect(await page.getByTestId("pix-payload").inputValue()).toBe(expectedPayload(15050));
+  expect(await page.getByTestId("pix-payload").inputValue()).toBe(expectedPayload(15050, CUSTOM));
 });
 
 test("presente em cotas: o convidado escolhe quantas cotas e o Pix acompanha", async ({ page }) => {
@@ -167,13 +172,13 @@ test("presente em cotas: o convidado escolhe quantas cotas e o Pix acompanha", a
   await card.getByTestId("presente-card-botao").click();
 
   await expect(page.getByTestId("pix-cotas")).toBeVisible();
-  expect(await page.getByTestId("pix-payload").inputValue()).toBe(expectedPayload(25000));
+  expect(await page.getByTestId("pix-payload").inputValue()).toBe(expectedPayload(25000, asGift(gift, 1)));
   await page.getByTestId("pix-cotas-mais").click();
   await page.getByTestId("pix-cotas-mais").click();
   await expect(page.getByTestId("pix-cotas-quantidade")).toHaveText("3");
   await expect(page.getByTestId("pix-valor")).toHaveText(PixBR.formatBRL(75000));
   const payload = await page.getByTestId("pix-payload").inputValue();
-  expect(payload).toBe(expectedPayload(75000));
+  expect(payload).toBe(expectedPayload(75000, asGift(gift, 3)));
   expect(await readQr(page.getByTestId("pix-qr"))).toBe(payload);
 
   await page.getByTestId("pix-cotas-mais").click(); // 4 cotas = presente completo
@@ -227,7 +232,7 @@ test("chave real do config.js (quando preenchida) gera um Pix válido em cada pr
     const cents = openingCents(gift);
     await page.getByTestId("presente-card-botao").nth(gift.index).click();
     const payload = await page.getByTestId("pix-payload").inputValue();
-    expect(payload).toBe(expectedPayload(cents, CONFIG.pix.chave));
+    expect(payload).toBe(expectedPayload(cents, asGift(gift), CONFIG.pix.chave));
     await expect(page.getByTestId("pix-recebedor-modal")).toHaveText(CONFIG.pix.recebedor.trim());
     await page.keyboard.press("Escape");
   }

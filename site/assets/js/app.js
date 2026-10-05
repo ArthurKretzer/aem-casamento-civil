@@ -170,7 +170,7 @@
       button.textContent = "presentear →";
       const label = quota ? `cotas de ${formatMoney(quota.cents, true)}` : formatMoney(cents, true);
       button.setAttribute("aria-label", `Presentear: ${gift.nome} (${label})`);
-      button.addEventListener("click", () => (quota ? openPix(quota.cents, gift.nome, quota.max) : openPix(cents, gift.nome)));
+      button.addEventListener("click", () => (quota ? openPix(quota.cents, gift.nome, quota.max, gift.id) : openPix(cents, gift.nome, 1, gift.id)));
     }
     body.append(button);
 
@@ -217,7 +217,7 @@
         return;
       }
       clearCustomError();
-      openPix(cents, CUSTOM_GIFT_NAME);
+      openPix(cents, CUSTOM_GIFT_NAME, 1, "valor-livre");
     });
   }
 
@@ -299,9 +299,9 @@
   // Presente aberto no modal. "quantity" só muda em presentes com cotas.
   let current = null;
 
-  function openPix(unitCents, giftName, maxQuantity = 1) {
+  function openPix(unitCents, giftName, maxQuantity = 1, giftId = "") {
     if (!pix) return;
-    current = { name: giftName, unitCents, quantity: 1, maxQuantity };
+    current = { id: giftId, name: giftName, unitCents, quantity: 1, maxQuantity };
     if (!updatePix()) return;
     copyFeedback.textContent = "";
 
@@ -321,7 +321,10 @@
     const cents = current.unitCents * current.quantity;
     let payload;
     try {
-      payload = Pix.buildPixPayload({ key: pix.key, name: pix.name, city: pix.city, cents });
+      // O presente vai na mensagem e no identificador do Pix, para os noivos saberem o que foi dado.
+      const reference = Pix.describeGift(
+        { id: current.id, name: current.name, quantity: current.quantity, quotas: current.maxQuantity > 1 }, pix.key);
+      payload = Pix.buildPixPayload({ key: pix.key, name: pix.name, city: pix.city, cents, ...reference });
       const check = Pix.validatePayload(payload);
       if (!check.ok) throw new Error(check.errors.join("; "));
     } catch (error) {

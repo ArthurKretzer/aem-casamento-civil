@@ -409,7 +409,11 @@
         );
       }
 
-      const merchantAccount = tlv("00", GUI) + tlv("01", key.value);
+      // 26.02: mensagem opcional (ex.: o presente escolhido). Muitos bancos a
+      // mostram a quem paga e a repassam a quem recebe. Cortada para caber.
+      let merchantAccount = tlv("00", GUI) + tlv("01", key.value);
+      const message = normalizeText(input.message, Math.max(0, MAX_FIELD - merchantAccount.length - 4));
+      if (message !== "") merchantAccount += tlv("02", message);
       const body =
         tlv("00", "01") +
         tlv("26", merchantAccount) +
@@ -548,6 +552,9 @@
         if (!hasOwn(account.map, "01") || account.map["01"] === "") {
           errors.push("Campo obrigatório ausente: 26.01 (chave Pix).");
         }
+        if (hasOwn(account.map, "02") && !/^[\x20-\x7e]+$/.test(account.map["02"])) {
+          errors.push("O campo 26.02 (mensagem) só pode ter caracteres ASCII (sem acentos).");
+        }
       }
 
       // 54: valor (opcional).
@@ -599,6 +606,47 @@
       return { ok: errors.length === 0, errors: errors, fields: fields };
     }
 
+    // ------------------------------------------------------------------
+    // Identificação do presente dentro do Pix
+    // ------------------------------------------------------------------
+
+    /** Quantos caracteres de mensagem (26.02) cabem junto com esta chave. */
+    function messageRoom(rawKey) {
+      return Math.max(0, MAX_FIELD - (tlv("00", GUI) + tlv("01", normalizeKey(rawKey).value)).length - 4);
+    }
+
+    // Palavras pequenas que não devem sobrar no fim de um nome cortado.
+    const DANGLING_WORDS = /\s+(?:a|o|as|os|e|de|da|do|das|dos|na|no|nas|nos|para|pra|com|em|ver)$/i;
+
+    /** Corta o texto entre palavras, sem deixar preposições soltas no fim. */
+    function shortenWords(text, maxLength) {
+      if (text.length <= maxLength) return text;
+      let cut = text.slice(0, maxLength + 1);
+      cut = cut.slice(0, cut.lastIndexOf(" ") > 0 ? cut.lastIndexOf(" ") : maxLength);
+      while (DANGLING_WORDS.test(cut)) cut = cut.replace(DANGLING_WORDS, "");
+      return cut.trim();
+    }
+
+    /**
+     * Mensagem (26.02) e identificador (62.05) de um presente, para os noivos
+     * saberem o que foi dado. gift = { id, name, quantity, quotas }.
+     * Ex.: { message: "Presente: Parrillada - 2 cotas", txid: "PARRILLADAX2" }.
+     */
+    function describeGift(gift, rawKey) {
+      const quantity = gift.quantity || 1;
+      const suffix = gift.quotas ? " - " + quantity + (quantity > 1 ? " cotas" : " cota") : "";
+      const room = messageRoom(rawKey);
+      const name = normalizeText(gift.name);
+      let message = "Presente: " + name + suffix;
+      if (message.length > room) message = name + suffix;
+      if (message.length > room) message = shortenWords(name, room - suffix.length) + suffix;
+      if (room < 8) message = ""; // chave longa demais: sem espaço útil para a mensagem
+
+      const tail = quantity > 1 ? "X" + quantity : "";
+      const base = normalizeText(gift.id).replace(/[^A-Za-z0-9]/g, "").toUpperCase().slice(0, MAX_TXID - tail.length);
+      return { message: message, txid: base ? base + tail : "***" };
+    }
+
     return Object.freeze({
       PixError: PixError,
       MIN_CENTS: MIN_CENTS,
@@ -612,6 +660,8 @@
       formatBRL: formatBRL,
       buildPixPayload: buildPixPayload,
       validatePayload: validatePayload,
+      messageRoom: messageRoom,
+      describeGift: describeGift,
     });
   }
 );
