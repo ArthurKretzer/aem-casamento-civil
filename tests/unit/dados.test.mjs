@@ -344,6 +344,21 @@ describe("validar-dados: dados corretos", () => {
     }
   });
 
+  it("aceita formulário de recados vazio, ausente ou com url formResponse e campos entry.N", () => {
+    const campos = { presente: "entry.1", valor: "entry.22", nome: "entry.333", mensagem: "entry.4444" };
+    for (const formularioRecados of [{ url: "", campos: {} }, { url: "https://docs.google.com/forms/d/e/1FAIpQ-x_y/formResponse", campos }]) {
+      assert.deepEqual(validate({ config: { formularioRecados } }).errors, [], JSON.stringify(formularioRecados));
+    }
+  });
+
+  it("recusa formulário de recados com url ou campos errados", () => {
+    const campos = { presente: "entry.1", valor: "entry.2", nome: "entry.3", mensagem: "entry.4" };
+    const wrongUrl = validate({ config: { formularioRecados: { url: "https://forms.gle/abc", campos } } }).errors;
+    assert.deepEqual(wrongUrl.map((issue) => issue.where), ["formularioRecados.url"]);
+    const wrongField = validate({ config: { formularioRecados: { url: "https://docs.google.com/forms/d/e/X/formResponse", campos: { ...campos, nome: "nome" } } } }).errors;
+    assert.deepEqual(wrongField.map((issue) => issue.where), ["formularioRecados.campos.nome"]);
+  });
+
   it("aceita WhatsApp com 12 ou 13 dígitos e o vazio", () => {
     for (const whatsapp of ["", "5548999998888", "554833334444"]) {
       assert.deepEqual(validate({ config: { whatsapp } }).errors, [], whatsapp);

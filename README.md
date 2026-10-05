@@ -39,6 +39,7 @@ Se alguma coisa estiver errada (uma vírgula esquecida, uma chave Pix inválida,
 | `pix.cidadeQr` | Cidade gravada no QR Code: sem acentos, até 15 letras (ex.: `"SAO JOSE"`). |
 | `whatsapp` | DDI + DDD + número, só dígitos (ex.: `"5548999998888"`). Usado só no botão **avisar os noivos**, depois do Pix. **Vazio = o botão some.** |
 | `formularioPresenca` | Link do Google Forms de confirmação de presença (`https://forms.gle/...`). Aparece como o botão **confirmar presença**; as respostas ficam na planilha ligada ao formulário. **Vazio = o botão some** e o site pede para falar com vocês. |
+| `formularioRecados` | Formulário "Recados" do Google Forms que recebe a mensagem que o convidado deixa no modal do Pix (com presente, valor e nome preenchidos pelo site). `url` é o endereço `.../formResponse` e `campos` traz o código `entry.N` de cada pergunta. **`url` vazia = o campo de recado some.** Veja [Recados](#recados). |
 | `siteUrl` | Endereço público do site, terminando em `/`. |
 
 ### O modo "Pix em breve"
@@ -67,6 +68,33 @@ Em `site/presentes.js` cada presente é um bloco `{ ... }`, e a ordem do arquivo
 - **Tirar um presente**: apague o bloco inteiro.
 - O card de "outro valor" (valor livre) já existe e não entra nessa lista.
 - Valores aceitos: de R$ 1,00 a R$ 100.000,00.
+
+### Recados
+
+No modal do Pix, o convidado pode deixar um recado (nome e mensagem). O site envia direto para o formulário "Recados" do Google Forms, e cada recado vira uma linha na planilha ligada a ele, com o presente, o valor, o nome e a mensagem. Não há credencial no site: ele usa o mesmo endereço público que o próprio Forms usa ao enviar.
+
+- O Google não confirma o recebimento ao site; na prática chega, mas confiram a planilha de vez em quando.
+- Mudar o **texto** de uma pergunta não quebra nada. **Apagar e recriar** uma pergunta troca o código `entry.N`: aí é preciso atualizar `formularioRecados.campos` no `config.js`.
+- O recado não comprova o Pix (e vice-versa): a confirmação do pagamento é sempre o extrato.
+
+**Opcional: receber cada recado por e-mail, com o texto.** O aviso padrão do Forms só diz "nova resposta". Para receber o recado inteiro:
+
+1. Abram a planilha de respostas do formulário "Recados" → **Extensões → Apps Script**.
+2. Apaguem o que estiver lá, colem o código abaixo e salvem.
+3. No menu da esquerda, **Acionadores (relógio) → Adicionar acionador**: função `enviarRecadoPorEmail`, evento **Da planilha → Ao enviar formulário** → Salvar (o Google pede para autorizar com a conta de vocês).
+
+```js
+function enviarRecadoPorEmail(e) {
+  // Respostas por pergunta, sem os espaços extras dos títulos: { Presente, Valor, Nome, Mensagem }
+  const r = {};
+  for (const [pergunta, valores] of Object.entries(e.namedValues)) r[pergunta.trim()] = (valores[0] || "").trim();
+  MailApp.sendEmail({
+    to: Session.getEffectiveUser().getEmail(),
+    subject: "Recado de " + (r.Nome || "um convidado") + " · " + r.Presente,
+    body: "Presente: " + r.Presente + "\nValor: " + r.Valor + "\nNome: " + r.Nome + "\n\n" + r.Mensagem,
+  });
+}
+```
 
 ### Fotos dos presentes
 

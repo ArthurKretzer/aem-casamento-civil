@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self'; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https:; font-src 'self'; connect-src 'self' https://docs.google.com; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; manifest-src 'self'" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="robots" content="noindex, nofollow" />
   <meta name="theme-color" content="#fbfaf7" />
@@ -189,6 +189,16 @@
         </div>
         <a id="saveQr" class="btn btn--ghost" data-testid="pix-salvar" href="#" download="pix-arthur-e-marina.png">salvar QR Code</a>
       </div>
+
+      <form class="dialog-message" data-testid="recado-form" novalidate hidden>
+        <p class="dialog-instruction">Quer deixar um recado para os noivos? <span class="dialog-message__hint">(opcional)</span></p>
+        <label class="sr-only" for="messageName">Seu nome</label>
+        <input id="messageName" data-testid="recado-nome" type="text" autocomplete="name" maxlength="80" placeholder="Seu nome" />
+        <label class="sr-only" for="messageText">Seu recado</label>
+        <textarea id="messageText" data-testid="recado-mensagem" rows="3" maxlength="500" placeholder="Seu recado para o Arthur e a Marina"></textarea>
+        <button class="btn btn--ghost" data-testid="recado-enviar" type="submit">enviar recado</button>
+        <p class="dialog-message__status" data-testid="recado-status" role="status" aria-live="polite"></p>
+      </form>
 
       <div class="dialog-foot">
         <button id="copyKeyDialog" class="btn btn--link" data-testid="pix-copiar-chave-modal" type="button">copiar só a chave Pix</button>

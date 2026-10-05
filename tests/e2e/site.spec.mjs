@@ -207,6 +207,37 @@ test("menu leva às seções; traje casual; presença pelo Google Forms, sem Wha
   await expect(rsvp).not.toContainText(/\d{1,2} de \w+|até/);
 });
 
+test("recado no modal: vai para o Google Forms com presente, cotas, valor, nome e mensagem", async ({ page }) => {
+  test.skip(!CONFIG.formularioRecados?.url, "formularioRecados.url está vazio no config.js");
+  const posts = [];
+  await page.route(/docs\.google\.com\/forms\//, (route) => {
+    posts.push({ url: route.request().url(), body: new URLSearchParams(route.request().postData() || "") });
+    return route.fulfill({ status: 200, body: "" });
+  });
+  await openSite(page, TEST);
+  const gift = AVAILABLE.find((item) => item.cota) || AVAILABLE[0];
+  await page.getByTestId("presente-card-botao").nth(gift.index).click();
+  if (gift.cota) await page.getByTestId("pix-cotas-mais").click();
+
+  await page.getByTestId("recado-enviar").click(); // sem mensagem: não envia
+  await expect(page.getByTestId("recado-status")).toContainText(/escreva/i);
+  expect(posts).toHaveLength(0);
+
+  await page.getByTestId("recado-nome").fill("Tia Teste");
+  await page.getByTestId("recado-mensagem").fill("Felicidades ao casal!");
+  await page.getByTestId("recado-enviar").click();
+  await expect(page.getByTestId("recado-status")).toContainText(/enviado/i);
+
+  expect(posts).toHaveLength(1);
+  const { campos, url } = CONFIG.formularioRecados;
+  const quantity = gift.cota ? 2 : 1;
+  expect(posts[0].url).toBe(url);
+  expect(posts[0].body.get(campos.presente)).toBe(gift.cota ? `${gift.nome} (2 cotas)` : gift.nome);
+  expect(posts[0].body.get(campos.valor)).toBe(PixBR.formatBRL(openingCents(gift) * quantity));
+  expect(posts[0].body.get(campos.nome)).toBe("Tia Teste");
+  expect(posts[0].body.get(campos.mensagem)).toBe("Felicidades ao casal!");
+});
+
 test("no celular (360px) não há rolagem horizontal", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 740 });
   await openSite(page, TEST);

@@ -304,6 +304,7 @@
     current = { id: giftId, name: giftName, unitCents, quantity: 1, maxQuantity };
     if (!updatePix()) return;
     copyFeedback.textContent = "";
+    resetMessageForm();
 
     if (typeof dialog.showModal === "function") {
       dialog.showModal();
@@ -444,6 +445,69 @@
     });
   }
 
+  // ---------- Recado para os noivos (Google Forms como destino) ----------
+  // Os campos ficam no modal, com o visual do site, e o envio vai direto para o
+  // formulário "Recados" dos noivos. Sem credenciais: é o endereço público do Forms.
+  const MESSAGE_FIELDS = ["presente", "valor", "nome", "mensagem"];
+  const messageConfig = CONFIG.formularioRecados || {};
+  const messageForm = byTestId("recado-form");
+  const messageName = byTestId("recado-nome");
+  const messageText = byTestId("recado-mensagem");
+  const messageButton = byTestId("recado-enviar");
+  const messageStatus = byTestId("recado-status");
+  const messageEnabled =
+    /^https:\/\/docs\.google\.com\/forms\/d\/e\/[\w-]+\/formResponse$/.test(String(messageConfig.url || "")) &&
+    MESSAGE_FIELDS.every((field) => /^entry\.\d+$/.test(String((messageConfig.campos || {})[field] || "")));
+
+  /** Recado em branco a cada presente aberto (o nome digitado é mantido). */
+  function resetMessageForm() {
+    if (!messageEnabled) return;
+    messageForm.hidden = false;
+    messageButton.disabled = false;
+    messageStatus.textContent = "";
+    messageText.removeAttribute("aria-invalid");
+    messageText.value = "";
+  }
+
+  function giftLabel() {
+    const quotas = current.maxQuantity > 1
+      ? ` (${current.quantity} ${current.quantity === 1 ? "cota" : "cotas"})`
+      : "";
+    return current.name + quotas;
+  }
+
+  function setupMessageForm() {
+    if (!messageEnabled) return;
+    messageForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const text = messageText.value.trim();
+      if (!text) {
+        messageText.setAttribute("aria-invalid", "true");
+        messageStatus.textContent = "Escreva o seu recado antes de enviar.";
+        messageText.focus();
+        return;
+      }
+      messageText.removeAttribute("aria-invalid");
+      const fields = messageConfig.campos;
+      const body = new URLSearchParams();
+      body.set(fields.presente, giftLabel());
+      body.set(fields.valor, formatMoney(current.unitCents * current.quantity, false));
+      body.set(fields.nome, messageName.value.trim());
+      body.set(fields.mensagem, text);
+
+      messageButton.disabled = true;
+      messageStatus.textContent = "Enviando…";
+      try {
+        // "no-cors": o Google não devolve resposta legível; sem erro de rede, o envio saiu.
+        await fetch(messageConfig.url, { method: "POST", mode: "no-cors", body });
+        messageStatus.textContent = "Recado enviado! Obrigado pelo carinho ♡";
+      } catch (error) {
+        messageButton.disabled = false;
+        messageStatus.textContent = "Não foi possível enviar agora. Tente de novo em instantes.";
+      }
+    });
+  }
+
   // ---------- Confirmação de presença (Google Forms) ----------
   function setupRsvp() {
     const url = String(CONFIG.formularioPresenca || "").trim();
@@ -475,6 +539,7 @@
   setupCustomGift();
   setupReceiver();
   setupDialog();
+  setupMessageForm();
   setupRsvp();
   setupNav();
 })();

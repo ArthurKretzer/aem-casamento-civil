@@ -34,7 +34,7 @@ const GIFT_ID_RE = /^[a-z0-9-]+$/;
 const MIN_VALUE_REAIS = 1;
 const MAX_VALUE_REAIS = 100000;
 
-const CONFIG_KEYS = ["pix", "whatsapp", "formularioPresenca", "siteUrl"];
+const CONFIG_KEYS = ["pix", "whatsapp", "formularioPresenca", "formularioRecados", "siteUrl"];
 const PIX_KEYS = ["chave", "recebedor", "nomeQr", "cidadeQr"];
 // Chave do exemplo oficial do Banco Central: aparece no README e nos testes, nunca no site.
 const EXAMPLE_KEY = "123e4567-e12b-12d1-a456-426655440000";
@@ -181,6 +181,24 @@ function checkConfig(rootDir, addError, addWarning) {
       && config.formularioPresenca !== ""
       && !/^https:\/\/(forms\.gle\/|docs\.google\.com\/forms\/)/.test(config.formularioPresenca)) {
     error("formularioPresenca", show(config.formularioPresenca) + " não é um link do Google Forms. Use o link de \"Enviar\" do formulário, por exemplo \"https://forms.gle/...\". Para esconder o botão, deixe \"\".");
+  }
+
+  // --- Formulário de recados (opcional) -------------------------------
+  if ("formularioRecados" in config) {
+    const recados = config.formularioRecados;
+    if (!isPlainObject(recados)) {
+      error("formularioRecados", "precisa ser um bloco { url, campos: { presente, valor, nome, mensagem } }.");
+    } else if (recados.url !== "") {
+      if (!/^https:\/\/docs\.google\.com\/forms\/d\/e\/[\w-]+\/formResponse$/.test(String(recados.url))) {
+        error("formularioRecados.url", show(recados.url) + " precisa ser o endereço \".../formResponse\" do Google Forms (ex.: \"https://docs.google.com/forms/d/e/ID/formResponse\"). Para esconder o recado, deixe \"\".");
+      }
+      for (const field of ["presente", "valor", "nome", "mensagem"]) {
+        const value = isPlainObject(recados.campos) ? recados.campos[field] : undefined;
+        if (!/^entry\.\d+$/.test(String(value))) {
+          error("formularioRecados.campos." + field, show(value) + " precisa ser o código da pergunta no Forms, no formato \"entry.123456\".");
+        }
+      }
+    }
   }
 
   // --- Endereço do site ----------------------------------------------

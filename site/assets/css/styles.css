@@ -853,6 +853,8 @@ footer small {
 
 .btn--ghost:hover { border-color: var(--gold); }
 
+.btn--ghost:disabled { opacity: .55; cursor: default; }
+
 .btn--link {
   min-height: 44px;
   padding: 0 6px;
@@ -929,6 +931,41 @@ footer small {
   image-rendering: pixelated;
 }
 
+.dialog-message {
+  margin-top: 26px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(156,113,63,.25);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dialog-message .dialog-instruction { margin: 0; text-align: center; }
+
+.dialog-message__hint { color: var(--ink-soft); font-style: italic; }
+
+.dialog-message input,
+.dialog-message textarea {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line-strong);
+  background: white;
+  padding: 12px 14px;
+  font-size: 16px; /* 16px evita o zoom automático do iPhone */
+  color: var(--ink);
+  resize: vertical;
+}
+
+.dialog-message textarea[aria-invalid="true"] { border-color: #a4462f; }
+
+.dialog-message__status {
+  margin: 0;
+  min-height: 1.4em;
+  text-align: center;
+  font-size: 14px;
+  color: var(--ink-soft);
+}
+
 .dialog-foot {
   margin-top: 22px;
   display: flex;
@@ -946,7 +983,8 @@ footer small {
 @media (hover: hover) and (pointer: fine) and (min-width: 700px) {
   .dialog-qr { order: 1; margin-top: 22px; padding-top: 0; border-top: 0; }
   .dialog-copy { order: 2; margin-top: 22px; padding-top: 22px; border-top: 1px solid rgba(156,113,63,.25); }
-  .dialog-foot { order: 3; }
+  .dialog-message { order: 3; }
+  .dialog-foot { order: 4; }
 }
 
 .sr-only {

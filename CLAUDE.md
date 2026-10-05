@@ -5,7 +5,7 @@ https://arthurkretzer.github.io/aem-casamento-civil/. Textos, README e comentár
 nomes de funções e variáveis em inglês.
 
 ## Estrutura
-- `site/` é a única pasta publicada. Os noivos editam só `site/config.js` (Pix, WhatsApp do "avisar os noivos" e link do Forms)
+- `site/` é a única pasta publicada. Os noivos editam só `site/config.js` (Pix, WhatsApp do "avisar os noivos", Forms de presença e de recados)
   e `site/presentes.js` (lista de presentes).
 - `site/assets/js/pix.js` (UMD: `PixBR` no navegador, `module.exports` no Node) e `app.js` (página e modal).
   Os `data-testid` do HTML são o contrato com os testes.
@@ -21,6 +21,7 @@ nomes de funções e variáveis em inglês.
 ## Regras
 - URLs sempre relativas (`assets/js/app.js`, nunca `/assets/...`): o site vive em `/aem-casamento-civil/`.
 - CSP `default-src 'self'`: nada inline (script, style, onclick). Fontes e libs locais, sem CDN.
+  Única exceção: `connect-src https://docs.google.com`, só para o envio do recado ao Google Forms.
 - A chave Pix vem SÓ de `site/config.js`, nunca de URL, query string ou campo da página.
   Chave vazia ou inválida mantém `html[data-pix="em-breve"]`.
 - Fotos dos presentes: JPEG 960x720, até 150 KB, em `site/assets/img/presentes/`.

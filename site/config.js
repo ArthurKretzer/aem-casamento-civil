@@ -30,6 +30,20 @@ window.SITE_CONFIG = {
   // Vazio = o botão "confirmar presença" some e o site pede para falar com vocês.
   formularioPresenca: "https://forms.gle/MrdA3pDX5QVpg98x8",
 
+  // Formulário "Recados" (Google Forms) que recebe as mensagens deixadas no
+  // modal do Pix. url = endereço ".../formResponse" do formulário; campos = o
+  // código "entry.N" de cada pergunta. Se apagar e recriar uma pergunta no
+  // Forms, o código muda. url vazia = o campo de recado some do site.
+  formularioRecados: {
+    url: "https://docs.google.com/forms/d/e/1FAIpQLSeAqsRsTndPoe799h9E9Ql1Xg4uZyI278csYwxMUbBSmLMqCg/formResponse",
+    campos: {
+      presente: "entry.1428095014",
+      valor: "entry.742247605",
+      nome: "entry.86522417",
+      mensagem: "entry.2031131335",
+    },
+  },
+
   // Endereço público do site, terminando em "/".
   siteUrl: "https://arthurkretzer.github.io/aem-casamento-civil/",
 };
